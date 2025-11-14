@@ -1,0 +1,14 @@
+# Logs
+*.log
+juntapdf.log
+
+# Arquivos temporários
+*.tmp
+*.temp
+__pycache__/
+*.pyc
+*.pyo
+
+# Diretórios do sistema
+JuntaPDF_Logs/
+JuntaPDF_Audit/

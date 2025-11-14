@@ -1,0 +1,859 @@
+2025-11-13 22:19:55,960 - INFO - ============================================================
+2025-11-13 22:19:55,960 - INFO - JuntaPDF Iniciado
+2025-11-13 22:19:55,960 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-13 22:19:55,960 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-13 22:19:55,976 - INFO - Política de retenção: 30 dias
+2025-11-13 22:19:55,976 - INFO - Rotacionamento: 10MB
+2025-11-13 22:19:55,979 - INFO - tkinterdnd2 disponível
+2025-11-13 22:19:56,035 - INFO - PyPDF2 disponível
+2025-11-13 22:19:56,039 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-13 22:19:56,070 - INFO - pikepdf disponível
+2025-11-13 22:19:56,204 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-13 22:19:56,205 - ERROR - Exceção não tratada: NameError: name '_atexit_cleanup_registered' is not defined
+NoneType: None
+2025-11-13 22:21:14,633 - INFO - ============================================================
+2025-11-13 22:21:14,633 - INFO - JuntaPDF Iniciado
+2025-11-13 22:21:14,633 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-13 22:21:14,633 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-13 22:21:14,633 - INFO - Política de retenção: 30 dias
+2025-11-13 22:21:14,634 - INFO - Rotacionamento: 10MB
+2025-11-13 22:21:14,637 - INFO - tkinterdnd2 disponível
+2025-11-13 22:21:14,679 - INFO - PyPDF2 disponível
+2025-11-13 22:21:14,679 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-13 22:21:14,726 - INFO - pikepdf disponível
+2025-11-13 22:21:14,811 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-13 22:21:14,811 - INFO - Cleanup registrado no atexit
+2025-11-13 22:21:14,811 - INFO - Procurando Ghostscript no sistema...
+2025-11-13 22:21:14,811 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 22:21:14,811 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-13 22:21:14,811 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-13 22:21:14,860 - INFO - ✅ Dependências verificadas:
+2025-11-13 22:21:14,860 - INFO -    - PyPDF2: True
+2025-11-13 22:21:14,860 - INFO -    - pikepdf: True
+2025-11-13 22:21:14,860 - INFO -    - Ghostscript: True
+2025-11-13 22:21:14,860 - INFO -    - PDF/A: True
+2025-11-13 22:21:14,860 - INFO -    - Drag & Drop: True
+2025-11-13 22:21:14,860 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-13 22:21:14,862 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 22:21:14,862 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-13 22:21:14,862 - INFO - Status DND_AVAILABLE: True
+2025-11-13 22:21:14,862 - INFO - Status PDFA_AVAILABLE: True
+2025-11-13 22:21:14,862 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-13 22:21:14,862 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-13 22:21:17,337 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 22:21:17,381 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-13 22:21:17,381 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 22:21:17,381 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 22:21:43,085 - INFO - ============================================================
+2025-11-13 22:21:43,085 - INFO - JuntaPDF Iniciado
+2025-11-13 22:21:43,085 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-13 22:21:43,085 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-13 22:21:43,085 - INFO - Política de retenção: 30 dias
+2025-11-13 22:21:43,085 - INFO - Rotacionamento: 10MB
+2025-11-13 22:21:43,096 - INFO - tkinterdnd2 disponível
+2025-11-13 22:21:43,153 - INFO - PyPDF2 disponível
+2025-11-13 22:21:43,163 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-13 22:21:43,210 - INFO - pikepdf disponível
+2025-11-13 22:21:43,298 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-13 22:21:43,298 - INFO - Cleanup registrado no atexit
+2025-11-13 22:21:43,298 - INFO - Procurando Ghostscript no sistema...
+2025-11-13 22:21:43,300 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 22:21:43,300 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-13 22:21:43,300 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-13 22:21:43,335 - INFO - ✅ Dependências verificadas:
+2025-11-13 22:21:43,335 - INFO -    - PyPDF2: True
+2025-11-13 22:21:43,335 - INFO -    - pikepdf: True
+2025-11-13 22:21:43,335 - INFO -    - Ghostscript: True
+2025-11-13 22:21:43,335 - INFO -    - PDF/A: True
+2025-11-13 22:21:43,335 - INFO -    - Drag & Drop: True
+2025-11-13 22:21:43,335 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-13 22:21:43,335 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 22:21:43,335 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-13 22:21:43,335 - INFO - Status DND_AVAILABLE: True
+2025-11-13 22:21:43,335 - INFO - Status PDFA_AVAILABLE: True
+2025-11-13 22:21:43,335 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-13 22:21:43,335 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-13 22:21:50,663 - INFO - Arquivo adicionado: paginateste3.pdf
+2025-11-13 22:21:50,663 - INFO - Arquivo adicionado: paginateste2.pdf
+2025-11-13 22:21:50,663 - INFO - Arquivo adicionado: paginateste1.pdf
+2025-11-13 22:21:56,140 - INFO - Iniciando união de 3 arquivos -> C:/Users/Pichau/Downloads\ROSANE.pdf
+2025-11-13 22:21:56,804 - INFO - PDF unido criado e validado: C:/Users/Pichau/Downloads\ROSANE.pdf (8.4 MB) - PDF válido (12 páginas, 8.43 MB)
+2025-11-13 22:21:58,182 - INFO - Pasta aberta: C:/Users/Pichau/Downloads
+2025-11-13 22:22:06,292 - INFO - Iniciando união de 3 arquivos -> C:/Users/Pichau/Downloads\ROSANE2.pdf
+2025-11-13 22:22:06,638 - INFO - Iniciando compressão: ._tmp_12444_1763083326.pdf -> Compactação Máxima
+2025-11-13 22:22:06,638 - INFO - Executando: Compressão Ghostscript
+2025-11-13 22:22:13,267 - INFO - Compressão concluída: 8.4MB -> 1.9MB (-77.9%)
+2025-11-13 22:22:13,567 - INFO - PDF unido criado e validado: C:/Users/Pichau/Downloads\ROSANE2.pdf (1.9 MB) - PDF válido (12 páginas, 1.86 MB)
+2025-11-13 22:22:15,601 - INFO - Pasta aberta: C:/Users/Pichau/Downloads
+2025-11-13 22:22:20,967 - INFO - Arquivo adicionado: PROF SUBSTITUTO.pdf
+2025-11-13 22:22:27,913 - INFO - Arquivo removido: paginateste1.pdf
+2025-11-13 22:22:30,793 - INFO - Arquivo removido: paginateste2.pdf
+2025-11-13 22:22:32,325 - INFO - Arquivo removido: paginateste3.pdf
+2025-11-13 22:22:41,990 - INFO - Iniciando união de 1 arquivos -> C:/Users/Pichau/Downloads\PROFSUBSTITUTO2.pdf
+2025-11-13 22:22:42,045 - INFO - Iniciando compressão: ._tmp_12444_1763083362.pdf -> Compactação Máxima
+2025-11-13 22:22:42,045 - INFO - Executando: Compressão Ghostscript
+2025-11-13 22:22:51,420 - INFO - Compressão concluída: 25.2MB -> 27.2MB (--8.0%)
+2025-11-13 22:22:53,364 - INFO - PDF unido criado e validado: C:/Users/Pichau/Downloads\PROFSUBSTITUTO2.pdf (27.2 MB) - PDF válido (45 páginas, 27.22 MB)
+2025-11-13 22:22:54,770 - INFO - Pasta aberta: C:/Users/Pichau/Downloads
+2025-11-13 22:23:13,496 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 22:23:13,525 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-13 22:23:13,525 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 22:23:13,525 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 22:24:12,663 - INFO - ============================================================
+2025-11-13 22:24:12,663 - INFO - JuntaPDF Iniciado
+2025-11-13 22:24:12,663 - INFO - Versão Python: 3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]
+2025-11-13 22:24:12,663 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-13 22:24:12,663 - INFO - Política de retenção: 30 dias
+2025-11-13 22:24:12,663 - INFO - Rotacionamento: 10MB
+2025-11-13 22:24:12,679 - INFO - tkinterdnd2 disponível
+2025-11-13 22:24:12,729 - INFO - PyPDF2 disponível
+2025-11-13 22:24:12,743 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-13 22:24:12,853 - INFO - pikepdf disponível
+2025-11-13 22:24:12,961 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-13 22:24:12,961 - INFO - Cleanup registrado no atexit
+2025-11-13 22:24:12,961 - INFO - Procurando Ghostscript no sistema...
+2025-11-13 22:24:12,963 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 22:24:12,963 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-13 22:24:12,963 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-13 22:24:12,991 - INFO - ✅ Dependências verificadas:
+2025-11-13 22:24:12,991 - INFO -    - PyPDF2: True
+2025-11-13 22:24:12,991 - INFO -    - pikepdf: True
+2025-11-13 22:24:12,991 - INFO -    - Ghostscript: True
+2025-11-13 22:24:12,991 - INFO -    - PDF/A: True
+2025-11-13 22:24:12,991 - INFO -    - Drag & Drop: True
+2025-11-13 22:24:12,991 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-13 22:24:12,991 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 22:24:12,991 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-13 22:24:12,991 - INFO - Status DND_AVAILABLE: True
+2025-11-13 22:24:12,991 - INFO - Status PDFA_AVAILABLE: True
+2025-11-13 22:24:12,991 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-13 22:24:12,991 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-13 22:24:19,323 - INFO - Arquivo adicionado: paginateste3.pdf
+2025-11-13 22:24:19,323 - INFO - Arquivo adicionado: paginateste2.pdf
+2025-11-13 22:24:19,323 - INFO - Arquivo adicionado: paginateste1.pdf
+2025-11-13 22:24:28,202 - INFO - Iniciando união de 3 arquivos -> C:/Users/Pichau/Downloads\nivel1.pdf
+2025-11-13 22:24:28,555 - INFO - Iniciando compressão: ._tmp_17672_1763083468.pdf -> Otimização Automática
+2025-11-13 22:24:28,555 - INFO - Executando: Compressão Ghostscript
+2025-11-13 22:24:36,716 - INFO - Compressão concluída: 8.4MB -> 3.1MB (-63.0%)
+2025-11-13 22:24:37,037 - INFO - PDF unido criado e validado: C:/Users/Pichau/Downloads\nivel1.pdf (3.1 MB) - PDF válido (12 páginas, 3.12 MB)
+2025-11-13 22:24:50,602 - INFO - Iniciando união de 3 arquivos -> C:/Users/Pichau/Downloads\nivel2.pdf
+2025-11-13 22:24:50,942 - INFO - Iniciando compressão: ._tmp_17672_1763083490.pdf -> Compactação Equilibrada
+2025-11-13 22:24:50,942 - INFO - Executando: Compressão Ghostscript
+2025-11-13 22:24:58,509 - INFO - Compressão concluída: 8.4MB -> 2.2MB (-74.2%)
+2025-11-13 22:24:58,836 - INFO - PDF unido criado e validado: C:/Users/Pichau/Downloads\nivel2.pdf (2.2 MB) - PDF válido (12 páginas, 2.17 MB)
+2025-11-13 22:25:07,194 - INFO - Iniciando união de 3 arquivos -> C:/Users/Pichau/Downloads\nivel3.pdf
+2025-11-13 22:25:07,542 - INFO - Iniciando compressão: ._tmp_17672_1763083507.pdf -> Compactação Máxima
+2025-11-13 22:25:07,542 - INFO - Executando: Compressão Ghostscript
+2025-11-13 22:25:14,982 - INFO - Compressão concluída: 8.4MB -> 1.9MB (-77.9%)
+2025-11-13 22:25:15,384 - INFO - PDF unido criado e validado: C:/Users/Pichau/Downloads\nivel3.pdf (1.9 MB) - PDF válido (12 páginas, 1.86 MB)
+2025-11-13 22:25:41,734 - INFO - Pasta aberta: C:/Users/Pichau/Downloads
+2025-11-13 22:27:23,632 - INFO - ============================================================
+2025-11-13 22:27:23,632 - INFO - JuntaPDF Iniciado
+2025-11-13 22:27:23,633 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-13 22:27:23,633 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-13 22:27:23,633 - INFO - Política de retenção: 30 dias
+2025-11-13 22:27:23,633 - INFO - Rotacionamento: 10MB
+2025-11-13 22:27:23,633 - INFO - tkinterdnd2 disponível
+2025-11-13 22:27:23,688 - INFO - PyPDF2 disponível
+2025-11-13 22:27:23,699 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-13 22:27:23,742 - INFO - pikepdf disponível
+2025-11-13 22:27:23,866 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-13 22:27:23,866 - INFO - Cleanup registrado no atexit
+2025-11-13 22:27:23,866 - INFO - Procurando Ghostscript no sistema...
+2025-11-13 22:27:23,866 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 22:27:23,866 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-13 22:27:23,866 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-13 22:27:23,986 - INFO - ✅ Dependências verificadas:
+2025-11-13 22:27:23,986 - INFO -    - PyPDF2: True
+2025-11-13 22:27:23,986 - INFO -    - pikepdf: True
+2025-11-13 22:27:23,986 - INFO -    - Ghostscript: True
+2025-11-13 22:27:23,986 - INFO -    - PDF/A: True
+2025-11-13 22:27:23,986 - INFO -    - Drag & Drop: True
+2025-11-13 22:27:23,986 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-13 22:27:23,986 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 22:27:23,986 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-13 22:27:23,986 - INFO - Status DND_AVAILABLE: True
+2025-11-13 22:27:23,986 - INFO - Status PDFA_AVAILABLE: True
+2025-11-13 22:27:23,986 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-13 22:27:23,986 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-13 22:27:47,558 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 22:27:47,585 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-13 22:27:47,585 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 22:27:47,585 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 22:27:49,797 - INFO - ============================================================
+2025-11-13 22:27:49,797 - INFO - JuntaPDF Iniciado
+2025-11-13 22:27:49,798 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-13 22:27:49,798 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-13 22:27:49,798 - INFO - Política de retenção: 30 dias
+2025-11-13 22:27:49,798 - INFO - Rotacionamento: 10MB
+2025-11-13 22:27:49,801 - INFO - tkinterdnd2 disponível
+2025-11-13 22:27:49,848 - INFO - PyPDF2 disponível
+2025-11-13 22:27:49,848 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-13 22:27:49,896 - INFO - pikepdf disponível
+2025-11-13 22:27:49,974 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-13 22:27:49,974 - INFO - Cleanup registrado no atexit
+2025-11-13 22:27:49,974 - INFO - Procurando Ghostscript no sistema...
+2025-11-13 22:27:49,975 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 22:27:49,975 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-13 22:27:49,975 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-13 22:27:50,018 - INFO - ✅ Dependências verificadas:
+2025-11-13 22:27:50,018 - INFO -    - PyPDF2: True
+2025-11-13 22:27:50,018 - INFO -    - pikepdf: True
+2025-11-13 22:27:50,018 - INFO -    - Ghostscript: True
+2025-11-13 22:27:50,018 - INFO -    - PDF/A: True
+2025-11-13 22:27:50,018 - INFO -    - Drag & Drop: True
+2025-11-13 22:27:50,018 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-13 22:27:50,018 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 22:27:50,018 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-13 22:27:50,019 - INFO - Status DND_AVAILABLE: True
+2025-11-13 22:27:50,019 - INFO - Status PDFA_AVAILABLE: True
+2025-11-13 22:27:50,019 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-13 22:27:50,019 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-13 22:28:01,274 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 22:28:01,307 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-13 22:28:01,307 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 22:28:01,309 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 22:30:37,475 - INFO - ============================================================
+2025-11-13 22:30:37,475 - INFO - JuntaPDF Iniciado
+2025-11-13 22:30:37,475 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-13 22:30:37,475 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-13 22:30:37,475 - INFO - Política de retenção: 30 dias
+2025-11-13 22:30:37,475 - INFO - Rotacionamento: 10MB
+2025-11-13 22:30:37,475 - INFO - tkinterdnd2 disponível
+2025-11-13 22:30:37,549 - INFO - PyPDF2 disponível
+2025-11-13 22:30:37,553 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-13 22:30:37,601 - INFO - pikepdf disponível
+2025-11-13 22:30:37,726 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-13 22:30:37,726 - INFO - Cleanup registrado no atexit
+2025-11-13 22:30:37,726 - INFO - Procurando Ghostscript no sistema...
+2025-11-13 22:30:37,726 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 22:30:37,726 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-13 22:30:37,726 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-13 22:30:37,772 - INFO - ✅ Dependências verificadas:
+2025-11-13 22:30:37,772 - INFO -    - PyPDF2: True
+2025-11-13 22:30:37,772 - INFO -    - pikepdf: True
+2025-11-13 22:30:37,772 - INFO -    - Ghostscript: True
+2025-11-13 22:30:37,772 - INFO -    - PDF/A: True
+2025-11-13 22:30:37,772 - INFO -    - Drag & Drop: True
+2025-11-13 22:30:37,772 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-13 22:30:37,772 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 22:30:37,772 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-13 22:30:37,772 - INFO - Status DND_AVAILABLE: True
+2025-11-13 22:30:37,772 - INFO - Status PDFA_AVAILABLE: True
+2025-11-13 22:30:37,772 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-13 22:30:37,772 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-13 22:30:46,293 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 22:30:46,319 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-13 22:30:46,319 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 22:30:46,319 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 22:31:04,851 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 22:31:04,883 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-13 22:31:04,883 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 22:31:04,899 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 23:19:13,522 - INFO - ============================================================
+2025-11-13 23:19:13,522 - INFO - JuntaPDF Iniciado
+2025-11-13 23:19:13,522 - INFO - Versão Python: 3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]
+2025-11-13 23:19:13,522 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-13 23:19:13,522 - INFO - Política de retenção: 30 dias
+2025-11-13 23:19:13,522 - INFO - Rotacionamento: 10MB
+2025-11-13 23:19:13,542 - INFO - tkinterdnd2 disponível
+2025-11-13 23:19:13,590 - INFO - PyPDF2 disponível
+2025-11-13 23:19:13,590 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-13 23:19:13,668 - INFO - pikepdf disponível
+2025-11-13 23:19:13,750 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-13 23:19:13,750 - INFO - Cleanup registrado no atexit
+2025-11-13 23:19:13,750 - INFO - Procurando Ghostscript no sistema...
+2025-11-13 23:19:13,759 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 23:19:13,759 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-13 23:19:13,759 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-13 23:19:13,849 - INFO - ✅ Dependências verificadas:
+2025-11-13 23:19:13,849 - INFO -    - PyPDF2: True
+2025-11-13 23:19:13,849 - INFO -    - pikepdf: True
+2025-11-13 23:19:13,849 - INFO -    - Ghostscript: True
+2025-11-13 23:19:13,849 - INFO -    - PDF/A: True
+2025-11-13 23:19:13,849 - INFO -    - Drag & Drop: True
+2025-11-13 23:19:13,849 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-13 23:19:13,849 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 23:19:13,849 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-13 23:19:13,849 - INFO - Status DND_AVAILABLE: True
+2025-11-13 23:19:13,849 - INFO - Status PDFA_AVAILABLE: True
+2025-11-13 23:19:13,849 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-13 23:19:13,849 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-13 23:19:34,735 - INFO - Arquivo adicionado: paginateste3.pdf
+2025-11-13 23:19:34,736 - INFO - Arquivo adicionado: paginateste2.pdf
+2025-11-13 23:19:34,736 - INFO - Arquivo adicionado: paginateste1.pdf
+2025-11-13 23:19:34,751 - INFO - Arquivo adicionado: StartDynamicContent - 2025-11-10T114922.412.pdf
+2025-11-13 23:19:34,756 - INFO - Arquivo adicionado: StartDynamicContent - 2025-11-10T114438.809.pdf
+2025-11-13 23:19:34,771 - INFO - Arquivo adicionado: $11_default_titlePrintVersionOutput$.pdf
+2025-11-13 23:19:41,956 - INFO - Iniciando união de 6 arquivos -> C:/Users/Pichau/Downloads\$11_default_titlePri..._unido_6arquivos_2025-11-13_2319.pdf
+2025-11-13 23:19:43,462 - INFO - PDF unido criado e validado: C:/Users/Pichau/Downloads\$11_default_titlePri..._unido_6arquivos_2025-11-13_2319.pdf (8.5 MB) - PDF válido (18 páginas, 8.52 MB)
+2025-11-13 23:19:45,242 - INFO - Pasta aberta: C:/Users/Pichau/Downloads
+2025-11-13 23:37:21,217 - INFO - ============================================================
+2025-11-13 23:37:21,217 - INFO - JuntaPDF Iniciado
+2025-11-13 23:37:21,217 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-13 23:37:21,217 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-13 23:37:21,217 - INFO - Política de retenção: 30 dias
+2025-11-13 23:37:21,217 - INFO - Rotacionamento: 10MB
+2025-11-13 23:37:21,217 - INFO - tkinterdnd2 disponível
+2025-11-13 23:37:21,281 - INFO - PyPDF2 disponível
+2025-11-13 23:37:21,281 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-13 23:37:21,328 - INFO - pikepdf disponível
+2025-11-13 23:37:21,440 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-13 23:37:21,440 - INFO - Cleanup registrado no atexit
+2025-11-13 23:37:21,440 - INFO - Procurando Ghostscript no sistema...
+2025-11-13 23:37:21,455 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 23:37:21,455 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-13 23:37:21,455 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-13 23:37:21,487 - INFO - ✅ Dependências verificadas:
+2025-11-13 23:37:21,487 - INFO -    - PyPDF2: True
+2025-11-13 23:37:21,487 - INFO -    - pikepdf: True
+2025-11-13 23:37:21,487 - INFO -    - Ghostscript: True
+2025-11-13 23:37:21,487 - INFO -    - PDF/A: True
+2025-11-13 23:37:21,487 - INFO -    - Drag & Drop: True
+2025-11-13 23:37:21,487 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-13 23:37:21,487 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 23:37:21,487 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-13 23:37:21,487 - INFO - Status DND_AVAILABLE: True
+2025-11-13 23:37:21,487 - INFO - Status PDFA_AVAILABLE: True
+2025-11-13 23:37:21,487 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-13 23:37:21,487 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-13 23:37:29,372 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 23:37:29,384 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-13 23:37:29,384 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 23:37:29,400 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 23:44:26,593 - INFO - ============================================================
+2025-11-13 23:44:26,593 - INFO - JuntaPDF Iniciado
+2025-11-13 23:44:26,593 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-13 23:44:26,593 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-13 23:44:26,593 - INFO - Política de retenção: 30 dias
+2025-11-13 23:44:26,593 - INFO - Rotacionamento: 10MB
+2025-11-13 23:44:26,593 - INFO - tkinterdnd2 disponível
+2025-11-13 23:44:26,656 - INFO - PyPDF2 disponível
+2025-11-13 23:44:26,656 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-13 23:44:26,711 - INFO - pikepdf disponível
+2025-11-13 23:44:26,846 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-13 23:44:26,846 - INFO - Cleanup registrado no atexit
+2025-11-13 23:44:26,846 - INFO - Procurando Ghostscript no sistema...
+2025-11-13 23:44:26,846 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 23:44:26,846 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-13 23:44:26,846 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-13 23:44:26,941 - INFO - ✅ Dependências verificadas:
+2025-11-13 23:44:26,941 - INFO -    - PyPDF2: True
+2025-11-13 23:44:26,941 - INFO -    - pikepdf: True
+2025-11-13 23:44:26,941 - INFO -    - Ghostscript: True
+2025-11-13 23:44:26,941 - INFO -    - PDF/A: True
+2025-11-13 23:44:26,941 - INFO -    - Drag & Drop: True
+2025-11-13 23:44:26,941 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-13 23:44:26,941 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 23:44:26,941 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-13 23:44:26,941 - INFO - Status DND_AVAILABLE: True
+2025-11-13 23:44:26,941 - INFO - Status PDFA_AVAILABLE: True
+2025-11-13 23:44:26,941 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-13 23:44:26,941 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-13 23:44:28,133 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 23:44:28,180 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-13 23:44:28,180 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 23:44:28,181 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 23:44:34,676 - INFO - ============================================================
+2025-11-13 23:44:34,676 - INFO - JuntaPDF Iniciado
+2025-11-13 23:44:34,676 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-13 23:44:34,676 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-13 23:44:34,676 - INFO - Política de retenção: 30 dias
+2025-11-13 23:44:34,676 - INFO - Rotacionamento: 10MB
+2025-11-13 23:44:34,691 - INFO - tkinterdnd2 disponível
+2025-11-13 23:44:34,748 - INFO - PyPDF2 disponível
+2025-11-13 23:44:34,752 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-13 23:44:34,785 - INFO - pikepdf disponível
+2025-11-13 23:44:34,868 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-13 23:44:34,868 - INFO - Cleanup registrado no atexit
+2025-11-13 23:44:34,868 - INFO - Procurando Ghostscript no sistema...
+2025-11-13 23:44:34,881 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 23:44:34,881 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-13 23:44:34,881 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-13 23:44:34,912 - INFO - ✅ Dependências verificadas:
+2025-11-13 23:44:34,912 - INFO -    - PyPDF2: True
+2025-11-13 23:44:34,912 - INFO -    - pikepdf: True
+2025-11-13 23:44:34,912 - INFO -    - Ghostscript: True
+2025-11-13 23:44:34,912 - INFO -    - PDF/A: True
+2025-11-13 23:44:34,912 - INFO -    - Drag & Drop: True
+2025-11-13 23:44:34,912 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-13 23:44:34,912 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-13 23:44:34,912 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-13 23:44:34,912 - INFO - Status DND_AVAILABLE: True
+2025-11-13 23:44:34,912 - INFO - Status PDFA_AVAILABLE: True
+2025-11-13 23:44:34,912 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-13 23:44:34,912 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-13 23:44:55,598 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 23:45:25,291 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 23:45:25,336 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-13 23:45:25,336 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-13 23:45:25,336 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:12:15,473 - INFO - ============================================================
+2025-11-14 00:12:15,473 - INFO - JuntaPDF Iniciado
+2025-11-14 00:12:15,473 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-14 00:12:15,473 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-14 00:12:15,473 - INFO - Política de retenção: 30 dias
+2025-11-14 00:12:15,473 - INFO - Rotacionamento: 10MB
+2025-11-14 00:12:15,473 - INFO - tkinterdnd2 disponível
+2025-11-14 00:12:15,540 - INFO - PyPDF2 disponível
+2025-11-14 00:12:15,540 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-14 00:12:15,584 - INFO - pikepdf disponível
+2025-11-14 00:12:15,711 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-14 00:12:15,711 - INFO - Cleanup registrado no atexit
+2025-11-14 00:12:15,711 - INFO - Procurando Ghostscript no sistema...
+2025-11-14 00:12:15,726 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:12:15,726 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-14 00:12:15,726 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-14 00:12:15,837 - INFO - ✅ Dependências verificadas:
+2025-11-14 00:12:15,837 - INFO -    - PyPDF2: True
+2025-11-14 00:12:15,837 - INFO -    - pikepdf: True
+2025-11-14 00:12:15,845 - INFO -    - Ghostscript: True
+2025-11-14 00:12:15,845 - INFO -    - PDF/A: True
+2025-11-14 00:12:15,845 - INFO -    - Drag & Drop: True
+2025-11-14 00:12:15,845 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-14 00:12:15,845 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:12:15,845 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-14 00:12:15,845 - INFO - Status DND_AVAILABLE: True
+2025-11-14 00:12:15,845 - INFO - Status PDFA_AVAILABLE: True
+2025-11-14 00:12:15,845 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-14 00:12:15,845 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-14 00:14:45,975 - INFO - ============================================================
+2025-11-14 00:14:45,975 - INFO - JuntaPDF Iniciado
+2025-11-14 00:14:45,975 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-14 00:14:45,975 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-14 00:14:45,975 - INFO - Política de retenção: 30 dias
+2025-11-14 00:14:45,975 - INFO - Rotacionamento: 10MB
+2025-11-14 00:14:45,975 - INFO - tkinterdnd2 disponível
+2025-11-14 00:14:46,022 - INFO - PyPDF2 disponível
+2025-11-14 00:14:46,022 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-14 00:14:46,070 - INFO - pikepdf disponível
+2025-11-14 00:14:46,190 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-14 00:14:46,190 - INFO - Cleanup registrado no atexit
+2025-11-14 00:14:46,190 - INFO - Procurando Ghostscript no sistema...
+2025-11-14 00:14:46,190 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:14:46,190 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-14 00:14:46,190 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-14 00:14:46,313 - INFO - ✅ Dependências verificadas:
+2025-11-14 00:14:46,313 - INFO -    - PyPDF2: True
+2025-11-14 00:14:46,313 - INFO -    - pikepdf: True
+2025-11-14 00:14:46,323 - INFO -    - Ghostscript: True
+2025-11-14 00:14:46,323 - INFO -    - PDF/A: True
+2025-11-14 00:14:46,323 - INFO -    - Drag & Drop: True
+2025-11-14 00:14:46,323 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-14 00:14:46,323 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:14:46,323 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-14 00:14:46,323 - INFO - Status DND_AVAILABLE: True
+2025-11-14 00:14:46,323 - INFO - Status PDFA_AVAILABLE: True
+2025-11-14 00:14:46,323 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-14 00:14:46,323 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-14 00:14:50,299 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:14:50,327 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-14 00:14:50,330 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:14:50,330 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:15:17,257 - INFO - ============================================================
+2025-11-14 00:15:17,257 - INFO - JuntaPDF Iniciado
+2025-11-14 00:15:17,257 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-14 00:15:17,257 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-14 00:15:17,257 - INFO - Política de retenção: 30 dias
+2025-11-14 00:15:17,257 - INFO - Rotacionamento: 10MB
+2025-11-14 00:15:17,257 - INFO - tkinterdnd2 disponível
+2025-11-14 00:15:17,294 - INFO - PyPDF2 disponível
+2025-11-14 00:15:17,311 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-14 00:15:17,343 - INFO - pikepdf disponível
+2025-11-14 00:15:17,422 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-14 00:15:17,422 - INFO - Cleanup registrado no atexit
+2025-11-14 00:15:17,422 - INFO - Procurando Ghostscript no sistema...
+2025-11-14 00:15:17,422 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:15:17,422 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-14 00:15:17,422 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-14 00:15:17,469 - INFO - ✅ Dependências verificadas:
+2025-11-14 00:15:17,469 - INFO -    - PyPDF2: True
+2025-11-14 00:15:17,469 - INFO -    - pikepdf: True
+2025-11-14 00:15:17,469 - INFO -    - Ghostscript: True
+2025-11-14 00:15:17,469 - INFO -    - PDF/A: True
+2025-11-14 00:15:17,469 - INFO -    - Drag & Drop: True
+2025-11-14 00:15:17,469 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-14 00:15:17,469 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:15:17,469 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-14 00:15:17,469 - INFO - Status DND_AVAILABLE: True
+2025-11-14 00:15:17,469 - INFO - Status PDFA_AVAILABLE: True
+2025-11-14 00:15:17,469 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-14 00:15:17,469 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-14 00:15:40,199 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:15:40,225 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-14 00:15:40,225 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:15:40,233 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:17:59,926 - INFO - ============================================================
+2025-11-14 00:17:59,926 - INFO - JuntaPDF Iniciado
+2025-11-14 00:17:59,926 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-14 00:17:59,926 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-14 00:17:59,926 - INFO - Política de retenção: 30 dias
+2025-11-14 00:17:59,926 - INFO - Rotacionamento: 10MB
+2025-11-14 00:17:59,930 - INFO - tkinterdnd2 disponível
+2025-11-14 00:17:59,977 - INFO - PyPDF2 disponível
+2025-11-14 00:17:59,977 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-14 00:18:00,025 - INFO - pikepdf disponível
+2025-11-14 00:18:00,143 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-14 00:18:00,143 - INFO - Cleanup registrado no atexit
+2025-11-14 00:18:00,143 - INFO - Procurando Ghostscript no sistema...
+2025-11-14 00:18:00,143 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:18:00,143 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-14 00:18:00,143 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-14 00:18:00,278 - INFO - ✅ Dependências verificadas:
+2025-11-14 00:18:00,278 - INFO -    - PyPDF2: True
+2025-11-14 00:18:00,278 - INFO -    - pikepdf: True
+2025-11-14 00:18:00,278 - INFO -    - Ghostscript: True
+2025-11-14 00:18:00,278 - INFO -    - PDF/A: True
+2025-11-14 00:18:00,278 - INFO -    - Drag & Drop: True
+2025-11-14 00:18:00,278 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-14 00:18:00,278 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:18:00,278 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-14 00:18:00,278 - INFO - Status DND_AVAILABLE: True
+2025-11-14 00:18:00,278 - INFO - Status PDFA_AVAILABLE: True
+2025-11-14 00:18:00,278 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-14 00:18:00,278 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-14 00:18:42,512 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:18:42,544 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-14 00:18:42,544 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:18:42,544 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:18:55,085 - INFO - ============================================================
+2025-11-14 00:18:55,085 - INFO - JuntaPDF Iniciado
+2025-11-14 00:18:55,085 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-14 00:18:55,085 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-14 00:18:55,085 - INFO - Política de retenção: 30 dias
+2025-11-14 00:18:55,085 - INFO - Rotacionamento: 10MB
+2025-11-14 00:18:55,085 - INFO - tkinterdnd2 disponível
+2025-11-14 00:18:55,128 - INFO - PyPDF2 disponível
+2025-11-14 00:18:55,143 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-14 00:18:55,175 - INFO - pikepdf disponível
+2025-11-14 00:18:55,255 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-14 00:18:55,255 - INFO - Cleanup registrado no atexit
+2025-11-14 00:18:55,255 - INFO - Procurando Ghostscript no sistema...
+2025-11-14 00:18:55,255 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:18:55,255 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-14 00:18:55,255 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-14 00:18:55,302 - INFO - ✅ Dependências verificadas:
+2025-11-14 00:18:55,302 - INFO -    - PyPDF2: True
+2025-11-14 00:18:55,302 - INFO -    - pikepdf: True
+2025-11-14 00:18:55,302 - INFO -    - Ghostscript: True
+2025-11-14 00:18:55,302 - INFO -    - PDF/A: True
+2025-11-14 00:18:55,302 - INFO -    - Drag & Drop: True
+2025-11-14 00:18:55,302 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-14 00:18:55,302 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:18:55,302 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-14 00:18:55,302 - INFO - Status DND_AVAILABLE: True
+2025-11-14 00:18:55,302 - INFO - Status PDFA_AVAILABLE: True
+2025-11-14 00:18:55,302 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-14 00:18:55,302 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-14 00:18:59,054 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:18:59,075 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-14 00:18:59,075 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:18:59,091 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:19:12,257 - INFO - ============================================================
+2025-11-14 00:19:12,257 - INFO - JuntaPDF Iniciado
+2025-11-14 00:19:12,257 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-14 00:19:12,257 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-14 00:19:12,257 - INFO - Política de retenção: 30 dias
+2025-11-14 00:19:12,257 - INFO - Rotacionamento: 10MB
+2025-11-14 00:19:12,257 - INFO - tkinterdnd2 disponível
+2025-11-14 00:19:12,305 - INFO - PyPDF2 disponível
+2025-11-14 00:19:12,305 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-14 00:19:12,352 - INFO - pikepdf disponível
+2025-11-14 00:19:12,431 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-14 00:19:12,431 - INFO - Cleanup registrado no atexit
+2025-11-14 00:19:12,431 - INFO - Procurando Ghostscript no sistema...
+2025-11-14 00:19:12,431 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:19:12,431 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-14 00:19:12,431 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-14 00:19:12,463 - INFO - ✅ Dependências verificadas:
+2025-11-14 00:19:12,463 - INFO -    - PyPDF2: True
+2025-11-14 00:19:12,463 - INFO -    - pikepdf: True
+2025-11-14 00:19:12,463 - INFO -    - Ghostscript: True
+2025-11-14 00:19:12,463 - INFO -    - PDF/A: True
+2025-11-14 00:19:12,463 - INFO -    - Drag & Drop: True
+2025-11-14 00:19:12,463 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-14 00:19:12,463 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:19:12,463 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-14 00:19:12,463 - INFO - Status DND_AVAILABLE: True
+2025-11-14 00:19:12,463 - INFO - Status PDFA_AVAILABLE: True
+2025-11-14 00:19:12,463 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-14 00:19:12,479 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-14 00:19:14,875 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:19:14,915 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-14 00:19:14,915 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:19:14,915 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:19:28,967 - INFO - ============================================================
+2025-11-14 00:19:28,967 - INFO - JuntaPDF Iniciado
+2025-11-14 00:19:28,967 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-14 00:19:28,967 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-14 00:19:28,967 - INFO - Política de retenção: 30 dias
+2025-11-14 00:19:28,967 - INFO - Rotacionamento: 10MB
+2025-11-14 00:19:28,975 - INFO - tkinterdnd2 disponível
+2025-11-14 00:19:29,023 - INFO - PyPDF2 disponível
+2025-11-14 00:19:29,023 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-14 00:19:29,057 - INFO - pikepdf disponível
+2025-11-14 00:19:29,151 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-14 00:19:29,151 - INFO - Cleanup registrado no atexit
+2025-11-14 00:19:29,151 - INFO - Procurando Ghostscript no sistema...
+2025-11-14 00:19:29,151 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:19:29,151 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-14 00:19:29,151 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-14 00:19:29,180 - INFO - ✅ Dependências verificadas:
+2025-11-14 00:19:29,180 - INFO -    - PyPDF2: True
+2025-11-14 00:19:29,180 - INFO -    - pikepdf: True
+2025-11-14 00:19:29,180 - INFO -    - Ghostscript: True
+2025-11-14 00:19:29,180 - INFO -    - PDF/A: True
+2025-11-14 00:19:29,180 - INFO -    - Drag & Drop: True
+2025-11-14 00:19:29,180 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-14 00:19:29,180 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:19:29,180 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-14 00:19:29,180 - INFO - Status DND_AVAILABLE: True
+2025-11-14 00:19:29,180 - INFO - Status PDFA_AVAILABLE: True
+2025-11-14 00:19:29,180 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-14 00:19:29,180 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-14 00:21:55,663 - INFO - ============================================================
+2025-11-14 00:21:55,663 - INFO - JuntaPDF Iniciado
+2025-11-14 00:21:55,663 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-14 00:21:55,663 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-14 00:21:55,663 - INFO - Política de retenção: 30 dias
+2025-11-14 00:21:55,663 - INFO - Rotacionamento: 10MB
+2025-11-14 00:21:55,663 - INFO - tkinterdnd2 disponível
+2025-11-14 00:21:55,710 - INFO - PyPDF2 disponível
+2025-11-14 00:21:55,710 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-14 00:21:55,757 - INFO - pikepdf disponível
+2025-11-14 00:21:55,884 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-14 00:21:55,884 - INFO - Cleanup registrado no atexit
+2025-11-14 00:21:55,884 - INFO - Procurando Ghostscript no sistema...
+2025-11-14 00:21:55,884 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:21:55,884 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-14 00:21:55,884 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-14 00:21:55,922 - INFO - ✅ Dependências verificadas:
+2025-11-14 00:21:55,922 - INFO -    - PyPDF2: True
+2025-11-14 00:21:55,922 - INFO -    - pikepdf: True
+2025-11-14 00:21:55,922 - INFO -    - Ghostscript: True
+2025-11-14 00:21:55,922 - INFO -    - PDF/A: True
+2025-11-14 00:21:55,922 - INFO -    - Drag & Drop: True
+2025-11-14 00:21:55,922 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-14 00:21:55,922 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:21:55,922 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-14 00:21:55,922 - INFO - Status DND_AVAILABLE: True
+2025-11-14 00:21:55,922 - INFO - Status PDFA_AVAILABLE: True
+2025-11-14 00:21:55,922 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-14 00:21:55,922 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-14 00:22:36,514 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:22:36,549 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-14 00:22:36,549 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:22:36,554 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:22:39,341 - INFO - ============================================================
+2025-11-14 00:22:39,341 - INFO - JuntaPDF Iniciado
+2025-11-14 00:22:39,341 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-14 00:22:39,341 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-14 00:22:39,341 - INFO - Política de retenção: 30 dias
+2025-11-14 00:22:39,341 - INFO - Rotacionamento: 10MB
+2025-11-14 00:22:39,341 - INFO - tkinterdnd2 disponível
+2025-11-14 00:22:39,389 - INFO - PyPDF2 disponível
+2025-11-14 00:22:39,389 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-14 00:22:39,436 - INFO - pikepdf disponível
+2025-11-14 00:22:39,519 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-14 00:22:39,519 - INFO - Cleanup registrado no atexit
+2025-11-14 00:22:39,519 - INFO - Procurando Ghostscript no sistema...
+2025-11-14 00:22:39,519 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:22:39,519 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-14 00:22:39,519 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-14 00:22:39,562 - INFO - ✅ Dependências verificadas:
+2025-11-14 00:22:39,562 - INFO -    - PyPDF2: True
+2025-11-14 00:22:39,562 - INFO -    - pikepdf: True
+2025-11-14 00:22:39,562 - INFO -    - Ghostscript: True
+2025-11-14 00:22:39,562 - INFO -    - PDF/A: True
+2025-11-14 00:22:39,562 - INFO -    - Drag & Drop: True
+2025-11-14 00:22:39,562 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-14 00:22:39,562 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:22:39,562 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-14 00:22:39,562 - INFO - Status DND_AVAILABLE: True
+2025-11-14 00:22:39,562 - INFO - Status PDFA_AVAILABLE: True
+2025-11-14 00:22:39,562 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-14 00:22:39,562 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-14 00:23:05,966 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:23:05,982 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-14 00:23:05,982 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:23:05,998 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:23:08,349 - INFO - ============================================================
+2025-11-14 00:23:08,349 - INFO - JuntaPDF Iniciado
+2025-11-14 00:23:08,349 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-14 00:23:08,349 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-14 00:23:08,349 - INFO - Política de retenção: 30 dias
+2025-11-14 00:23:08,349 - INFO - Rotacionamento: 10MB
+2025-11-14 00:23:08,349 - INFO - tkinterdnd2 disponível
+2025-11-14 00:23:08,399 - INFO - PyPDF2 disponível
+2025-11-14 00:23:08,399 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-14 00:23:08,428 - INFO - pikepdf disponível
+2025-11-14 00:23:08,523 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-14 00:23:08,523 - INFO - Cleanup registrado no atexit
+2025-11-14 00:23:08,523 - INFO - Procurando Ghostscript no sistema...
+2025-11-14 00:23:08,523 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:23:08,523 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-14 00:23:08,523 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-14 00:23:08,555 - INFO - ✅ Dependências verificadas:
+2025-11-14 00:23:08,555 - INFO -    - PyPDF2: True
+2025-11-14 00:23:08,555 - INFO -    - pikepdf: True
+2025-11-14 00:23:08,555 - INFO -    - Ghostscript: True
+2025-11-14 00:23:08,555 - INFO -    - PDF/A: True
+2025-11-14 00:23:08,555 - INFO -    - Drag & Drop: True
+2025-11-14 00:23:08,555 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-14 00:23:08,555 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:23:08,555 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-14 00:23:08,555 - INFO - Status DND_AVAILABLE: True
+2025-11-14 00:23:08,555 - INFO - Status PDFA_AVAILABLE: True
+2025-11-14 00:23:08,555 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-14 00:23:08,555 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-14 00:23:16,512 - INFO - Pasta de saída selecionada: C:/Users/Pichau/Downloads/03-2025
+2025-11-14 00:27:00,086 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:27:00,116 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-14 00:27:00,116 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:27:00,116 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:27:01,021 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:27:01,037 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-14 00:27:01,037 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:27:01,037 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:27:01,604 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:27:01,625 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-14 00:27:01,625 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:27:01,625 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:27:05,504 - INFO - ============================================================
+2025-11-14 00:27:05,504 - INFO - JuntaPDF Iniciado
+2025-11-14 00:27:05,504 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-14 00:27:05,504 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-14 00:27:05,504 - INFO - Política de retenção: 30 dias
+2025-11-14 00:27:05,504 - INFO - Rotacionamento: 10MB
+2025-11-14 00:27:05,520 - INFO - tkinterdnd2 disponível
+2025-11-14 00:27:05,577 - INFO - PyPDF2 disponível
+2025-11-14 00:27:05,581 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-14 00:27:05,631 - INFO - pikepdf disponível
+2025-11-14 00:27:05,741 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-14 00:27:05,741 - INFO - Cleanup registrado no atexit
+2025-11-14 00:27:05,741 - INFO - Procurando Ghostscript no sistema...
+2025-11-14 00:27:05,741 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:27:05,741 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-14 00:27:05,741 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-14 00:27:05,789 - INFO - ✅ Dependências verificadas:
+2025-11-14 00:27:05,789 - INFO -    - PyPDF2: True
+2025-11-14 00:27:05,789 - INFO -    - pikepdf: True
+2025-11-14 00:27:05,789 - INFO -    - Ghostscript: True
+2025-11-14 00:27:05,789 - INFO -    - PDF/A: True
+2025-11-14 00:27:05,789 - INFO -    - Drag & Drop: True
+2025-11-14 00:27:05,789 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-14 00:27:05,789 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:27:05,789 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-14 00:27:05,789 - INFO - Status DND_AVAILABLE: True
+2025-11-14 00:27:05,789 - INFO - Status PDFA_AVAILABLE: True
+2025-11-14 00:27:05,789 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-14 00:27:05,789 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-14 00:27:49,554 - INFO - ============================================================
+2025-11-14 00:27:49,554 - INFO - JuntaPDF Iniciado
+2025-11-14 00:27:49,554 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-14 00:27:49,554 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-14 00:27:49,554 - INFO - Política de retenção: 30 dias
+2025-11-14 00:27:49,554 - INFO - Rotacionamento: 10MB
+2025-11-14 00:27:49,554 - INFO - tkinterdnd2 disponível
+2025-11-14 00:27:49,601 - INFO - PyPDF2 disponível
+2025-11-14 00:27:49,601 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-14 00:27:49,649 - INFO - pikepdf disponível
+2025-11-14 00:27:49,740 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-14 00:27:49,742 - INFO - Cleanup registrado no atexit
+2025-11-14 00:27:49,742 - INFO - Procurando Ghostscript no sistema...
+2025-11-14 00:27:49,744 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:27:49,744 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-14 00:27:49,744 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-14 00:27:49,777 - INFO - ✅ Dependências verificadas:
+2025-11-14 00:27:49,777 - INFO -    - PyPDF2: True
+2025-11-14 00:27:49,777 - INFO -    - pikepdf: True
+2025-11-14 00:27:49,777 - INFO -    - Ghostscript: True
+2025-11-14 00:27:49,777 - INFO -    - PDF/A: True
+2025-11-14 00:27:49,777 - INFO -    - Drag & Drop: True
+2025-11-14 00:27:49,777 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-14 00:27:49,777 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:27:49,777 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-14 00:27:49,777 - INFO - Status DND_AVAILABLE: True
+2025-11-14 00:27:49,777 - INFO - Status PDFA_AVAILABLE: True
+2025-11-14 00:27:49,777 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-14 00:27:49,777 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-14 00:31:37,462 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:31:37,499 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-14 00:31:37,499 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:31:37,499 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:31:44,073 - INFO - ============================================================
+2025-11-14 00:31:44,073 - INFO - JuntaPDF Iniciado
+2025-11-14 00:31:44,073 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-14 00:31:44,073 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-14 00:31:44,073 - INFO - Política de retenção: 30 dias
+2025-11-14 00:31:44,073 - INFO - Rotacionamento: 10MB
+2025-11-14 00:31:44,084 - INFO - tkinterdnd2 disponível
+2025-11-14 00:31:44,148 - INFO - PyPDF2 disponível
+2025-11-14 00:31:44,150 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-14 00:31:44,195 - INFO - pikepdf disponível
+2025-11-14 00:31:44,322 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-14 00:31:44,322 - INFO - Cleanup registrado no atexit
+2025-11-14 00:31:44,322 - INFO - Procurando Ghostscript no sistema...
+2025-11-14 00:31:44,322 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:31:44,322 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-14 00:31:44,322 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-14 00:31:44,322 - ERROR - Exceção não tratada: NameError: name 'on_closing' is not defined
+NoneType: None
+2025-11-14 00:31:48,911 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:33:25,989 - INFO - ============================================================
+2025-11-14 00:33:25,989 - INFO - JuntaPDF Iniciado
+2025-11-14 00:33:25,989 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-14 00:33:25,989 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-14 00:33:25,989 - INFO - Política de retenção: 30 dias
+2025-11-14 00:33:25,989 - INFO - Rotacionamento: 10MB
+2025-11-14 00:33:26,005 - INFO - tkinterdnd2 disponível
+2025-11-14 00:33:26,052 - INFO - PyPDF2 disponível
+2025-11-14 00:33:26,052 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-14 00:33:26,110 - INFO - pikepdf disponível
+2025-11-14 00:33:26,243 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-14 00:33:26,243 - INFO - Cleanup registrado no atexit
+2025-11-14 00:33:26,243 - INFO - Procurando Ghostscript no sistema...
+2025-11-14 00:33:26,243 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:33:26,243 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-14 00:33:26,243 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-14 00:33:26,243 - ERROR - Exceção não tratada: NameError: name 'on_closing' is not defined
+NoneType: None
+2025-11-14 00:33:30,847 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:37:40,617 - INFO - ============================================================
+2025-11-14 00:37:40,617 - INFO - JuntaPDF Iniciado
+2025-11-14 00:37:40,617 - INFO - Versão Python: 3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]
+2025-11-14 00:37:40,617 - INFO - Diretório de Log: C:\Users\Pichau\AppData\Local\Temp\JuntaPDF_Logs
+2025-11-14 00:37:40,617 - INFO - Política de retenção: 30 dias
+2025-11-14 00:37:40,617 - INFO - Rotacionamento: 10MB
+2025-11-14 00:37:40,617 - INFO - tkinterdnd2 disponível
+2025-11-14 00:37:40,681 - INFO - PyPDF2 disponível
+2025-11-14 00:37:40,688 - INFO - pikepdf C++ to Python logger bridge initialized
+2025-11-14 00:37:40,729 - INFO - pikepdf disponível
+2025-11-14 00:37:40,855 - INFO - Janela criada com suporte a Drag & Drop
+2025-11-14 00:37:40,855 - INFO - Cleanup registrado no atexit
+2025-11-14 00:37:40,855 - INFO - Procurando Ghostscript no sistema...
+2025-11-14 00:37:40,855 - INFO - Ghostscript encontrado no PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:37:40,855 - INFO - Perfil ICC encontrado: C:\Program Files\gs\gs10.06.0\iccprofiles\srgb.icc
+2025-11-14 00:37:40,855 - INFO - PDF/A disponível: Ghostscript e ICC encontrados
+2025-11-14 00:37:40,903 - INFO - ✅ Dependências verificadas:
+2025-11-14 00:37:40,903 - INFO -    - PyPDF2: True
+2025-11-14 00:37:40,903 - INFO -    - pikepdf: True
+2025-11-14 00:37:40,903 - INFO -    - Ghostscript: True
+2025-11-14 00:37:40,903 - INFO -    - PDF/A: True
+2025-11-14 00:37:40,903 - INFO -    - Drag & Drop: True
+2025-11-14 00:37:40,903 - INFO - Status PDF_LIBS_AVAILABLE: True
+2025-11-14 00:37:40,903 - INFO - Status GHOSTSCRIPT_PATH: C:\Program Files\gs\gs10.06.0\bin\gswin64c.EXE
+2025-11-14 00:37:40,903 - INFO - Status PIKEPDF_AVAILABLE: True
+2025-11-14 00:37:40,903 - INFO - Status DND_AVAILABLE: True
+2025-11-14 00:37:40,903 - INFO - Status PDFA_AVAILABLE: True
+2025-11-14 00:37:40,903 - INFO - ✅ JuntaPDF inicializado com sucesso!
+2025-11-14 00:37:40,903 - INFO - 🚀 Iniciando interface gráfica...
+2025-11-14 00:38:03,268 - INFO - Arquivo adicionado: contracheque.pdf
+2025-11-14 00:38:03,281 - INFO - Arquivo adicionado: plano setor velho.pdf
+2025-11-14 00:38:03,296 - INFO - Arquivo adicionado: 1579-calendarios-de-eventos-2025-v2.pdf
+2025-11-14 00:38:03,296 - INFO - Arquivo adicionado: 1558-calendario-de-eventos-2024-.pdf
+2025-11-14 00:38:11,496 - INFO - Arquivo removido: 1579-calendarios-de-eventos-2025-v2.pdf
+2025-11-14 00:38:48,284 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:38:48,316 - INFO - 🧹 Finalizando JuntaPDF...
+2025-11-14 00:38:48,316 - INFO - Iniciando limpeza de arquivos temporários
+2025-11-14 00:38:48,316 - INFO - Iniciando limpeza de arquivos temporários
