@@ -1,6 +1,5 @@
-# JuntaPDF - Ferramenta de Gestão e Processamento Documental
+# JuntaPDF - Gestão e Processamento Documental
 
-**Versão:** 2.0 (Estável)
 **Licença:** BSD 3-Clause
 **Classificação:** Software de Utilidade Administrativa / Processamento Local
 
