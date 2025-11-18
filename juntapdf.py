@@ -14,8 +14,8 @@ import time
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import webbrowser
-print("Executável usado:", sys.executable)
 
+print("Executável usado:", sys.executable)
 
 try:
     import psutil
@@ -24,45 +24,17 @@ except ImportError:
     PSUtil_AVAILABLE = False
     logging.warning("psutil não disponível - algumas métricas estarão limitadas")
 
-
-pdf_metadata_cache = {}
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler('juntapdf.log', encoding='utf-8')
-    ]
-)
-
-# =============================================================================
-# VARIÁVEIS GLOBAIS DE DEPENDÊNCIAS - DEFINIR PRIMEIRO
-# =============================================================================
-PDF_LIBS_AVAILABLE = False
-PIKEPDF_AVAILABLE = False  
-DND_AVAILABLE = False
-PDFA_AVAILABLE = False
-GHOSTSCRIPT_PATH = None
-ICC_PROFILE_PATH = None
-_atexit_cleanup_registered = False
-temp_files_global = []
-temp_files_lock = threading.Lock()
-
-# =============================================================================
-# CONFIGURAÇÃO DE LOGGING PROFISSIONAL COM SEGURANÇA
-# =============================================================================
 class SecureLogger:
     def __init__(self):
         self.sensitive_patterns = [
             r'password[=:]\s*\S+',
             r'user[=:]\s*\S+',
-            r'[\w\.-]+@[\w\.-]+\.\w+',  # emails
+            r'[\w\.-]+@[\w\.-]+\.\w+',
             r'senha[=:]\s*\S+',
             r'pwd[=:]\s*\S+'
         ]
     
     def sanitize_log(self, message):
-        """Remove informações sensíveis dos logs"""
         if not isinstance(message, str):
             message = str(message)
         for pattern in self.sensitive_patterns:
@@ -72,7 +44,6 @@ class SecureLogger:
 secure_logger = SecureLogger()
 
 def limpar_logs_antigos(dias=30):
-    """Remove logs com mais de X dias - Compliance institucional"""
     try:
         log_dir = os.path.join(tempfile.gettempdir(), "JuntaPDF_Logs")
         if not os.path.exists(log_dir):
@@ -92,7 +63,6 @@ def limpar_logs_antigos(dias=30):
         logging.warning(f"Erro ao limpar logs antigos: {e}")
 
 def setup_log_rotation():
-    """Configura rotação automática de logs para evitar arquivos muito grandes"""
     try:
         log_dir = os.path.join(tempfile.gettempdir(), "JuntaPDF_Logs")
         if not os.path.exists(log_dir):
@@ -100,7 +70,6 @@ def setup_log_rotation():
             
         for log_file in glob.glob(os.path.join(log_dir, "juntapdf_*.log")):
             try:
-                # Rotaciona se maior que 10MB (mais conservador)
                 if os.path.getsize(log_file) > 10 * 1024 * 1024:
                     base_name = os.path.basename(log_file)
                     name_without_ext = os.path.splitext(base_name)[0]
@@ -117,21 +86,16 @@ def setup_log_rotation():
     except Exception as e:
         logging.warning(f"Erro no sistema de rotação de logs: {e}")
 
-
 def setup_logging():
-    """Configura sistema de logging profissional para troubleshooting"""
-    # 🔥 NOVO: Rotação de logs antes de criar novo
     setup_log_rotation()
     
     log_dir = os.path.join(tempfile.gettempdir(), "JuntaPDF_Logs")
     os.makedirs(log_dir, exist_ok=True)
     
-    # 🔥 NOVO: Limpeza de logs antigos (compliance institucional)
-    limpar_logs_antigos(30)  # Mantém apenas logs dos últimos 30 dias
+    limpar_logs_antigos(30)
     
     log_file = os.path.join(log_dir, f"juntapdf_{time.strftime('%Y%m%d')}.log")
     
-    # Handler personalizado para sanitização
     class SanitizedFileHandler(logging.FileHandler):
         def emit(self, record):
             record.msg = secure_logger.sanitize_log(record.msg)
@@ -153,81 +117,47 @@ def setup_logging():
     logging.info("JuntaPDF Iniciado")
     logging.info(f"Versão Python: {sys.version}")
     logging.info(f"Diretório de Log: {log_dir}")
-    logging.info(f"Política de retenção: 30 dias")
-    logging.info(f"Rotacionamento: 10MB")
 
 setup_logging()
 
-def setup_recovery_indicator():
-    recovered = attempt_auto_recovery()
-    if recovered:
-        recovery_frame = ttk.Frame(root)
-        recovery_frame.pack(side="top", fill="x", padx=10, pady=5)
-        
-        ttk.Button(
-            recovery_frame, 
-            text="🔄 Recovery Disponível - Clique aqui",
-            command=show_recovery_dashboard,
-            style="Accent.TButton"
-        ).pack(fill="x")
+PDF_LIBS_AVAILABLE = False
+PIKEPDF_AVAILABLE = False  
+DND_AVAILABLE = False
+PDFA_AVAILABLE = False
+GHOSTSCRIPT_PATH = None
+ICC_PROFILE_PATH = None
+_atexit_cleanup_registered = False
+temp_files_global = []
+temp_files_lock = threading.Lock()
 
-def show_first_run_disclaimer():
-    """Mostra aviso na primeira execução"""
-    config_file = os.path.join(tempfile.gettempdir(), "juntapdf_aceite.flag")
-    
-    if not os.path.exists(config_file):
-        response = messagebox.askyesno(
-            "Termo de Uso - JuntaPDF",
-            "Esta ferramenta processa PDFs localmente.\n\n"
-            "• Não envia dados para internet\n"
-            "• Usuário é responsável pelo conteúdo processado\n"
-            "• Logs são armazenados localmente\n\n"
-            "Aceita os termos de uso?",
-            icon='question'
-        )
-        
-        if response:
-            open(config_file, 'w').write(f"Aceito em: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-        else:
-            sys.exit(0)
-
-# =============================================================================
-# CONSTANTES DE SEGURANÇA E LIMITES
-# =============================================================================
 MAX_CONCURRENT_OPERATIONS = 1
-MAX_FILE_SIZE = 500 * 1024 * 1024  # 500MB
+MAX_FILE_SIZE = 500 * 1024 * 1024
 MAX_TOTAL_PAGES = 10000
 MAX_FILES_PER_OPERATION = 100
 
-# =============================================================================
-# EXCEÇÕES PERSONALIZADAS
-# =============================================================================
+MAX_FILES_FOR_SPLIT = 10
+MAX_PAGES_PER_FILE_FOR_SPLIT = 1000
+MAX_TOTAL_OUTPUT_FILES = 500
+MAX_PAGES_FOR_SINGLE_FILE_SPLIT = 200
+
 class SecurityError(Exception):
-    """Erro de segurança"""
     pass
 
 class PDFCorruptionError(Exception):
-    """PDF corrompido ou inválido"""
     pass
 
 class SystemOverloadError(Exception):
-    """Sistema sobrecarregado"""
     pass
 
 class PDFProcessingError(Exception):
-    """Erro geral de processamento PDF"""
     pass
 
-# =============================================================================
-# MONITORAMENTO DE PERFORMANCE E SEGURANÇA
-# =============================================================================
 class PerformanceMonitor:
     def __init__(self):
         self.operation_times = []
         self.memory_usage = []
     
     def check_system_health(self):
-        """Verifica se o sistema está saudável"""
         try:
             import psutil
             memory = psutil.virtual_memory()
@@ -238,16 +168,11 @@ class PerformanceMonitor:
             if cpu > 80:
                 raise SystemOverloadError("CPU sobrecarregada")
         except ImportError:
-            # psutil não disponível, continuar sem monitoramento
             pass
 
 performance_monitor = PerformanceMonitor()
 
-# =============================================================================
-# SISTEMA DE RECUPERAÇÃO DE FALHAS
-# =============================================================================
 def create_operation_checkpoint(operation_type, files_processed, current_step, temp_files):
-    """Salva estado atual da operação para recovery"""
     checkpoint = {
         'operation_type': operation_type,
         'files_processed': list(files_processed),
@@ -260,7 +185,6 @@ def create_operation_checkpoint(operation_type, files_processed, current_step, t
     try:
         with open(checkpoint_file, 'w', encoding='utf-8') as f:
             json.dump(checkpoint, f)
-        # Restringir permissões do arquivo
         if hasattr(os, 'chmod'):
             os.chmod(checkpoint_file, 0o600)
         logging.info(f"Checkpoint criado: {checkpoint_file}")
@@ -268,7 +192,6 @@ def create_operation_checkpoint(operation_type, files_processed, current_step, t
         logging.warning(f"Erro ao criar checkpoint: {e}")
 
 def cleanup_checkpoint():
-    """Remove checkpoint após operação bem-sucedida"""
     checkpoint_file = os.path.join(tempfile.gettempdir(), f"juntapdf_checkpoint_{os.getpid()}.json")
     try:
         if os.path.exists(checkpoint_file):
@@ -277,203 +200,28 @@ def cleanup_checkpoint():
     except Exception as e:
         logging.warning(f"Erro ao remover checkpoint: {e}")
 
-# =============================================================================
-# 🚨 CORREÇÃO 1: EXECUÇÃO SEGURA CENTRALIZADA - ELIMINA TODOS shell=True
-# =============================================================================
-
-def attempt_auto_recovery():
-    """Tenta recuperação automática de operações interrompidas"""
-    checkpoint_pattern = os.path.join(tempfile.gettempdir(), "juntapdf_checkpoint_*.json")
-    checkpoints = glob.glob(checkpoint_pattern)
-    
-    recovered_operations = []
-    
-    for checkpoint_file in checkpoints:
-        try:
-            with open(checkpoint_file, 'r', encoding='utf-8') as f:
-                checkpoint = json.load(f)
-            
-            # Verificar se é recente (menos de 1 hora) e válido
-            is_recent = time.time() - checkpoint.get('timestamp', 0) < 3600
-            has_valid_data = checkpoint.get('files_processed') and checkpoint.get('operation_type')
-            
-            if is_recent and has_valid_data:
-                recovered_operations.append({
-                    'file': checkpoint_file,
-                    'data': checkpoint,
-                    'age_minutes': int((time.time() - checkpoint['timestamp']) / 60)
-                })
-                
-        except Exception as e:
-            logging.warning(f"Erro ao processar checkpoint {checkpoint_file}: {e}")
-            # Remove checkpoint corrompido
-            try:
-                os.remove(checkpoint_file)
-            except:
-                pass
-    
-    return recovered_operations
-
-def offer_recovery_on_startup():
-    """Oferece recovery na inicialização do programa"""
-    try:
-        recovered = attempt_auto_recovery()
-        if not recovered:
-            return
-            
-        for recovery in recovered:
-            operation_type = recovery['data'].get('operation_type', 'Desconhecida')
-            file_count = len(recovery['data'].get('files_processed', []))
-            age = recovery['age_minutes']
-            
-            response = messagebox.askyesno(
-                "Recuperação Disponível",
-                f"Foi detectada uma operação interrompida:\n\n"
-                f"• Tipo: {operation_type}\n"
-                f"• Arquivos: {file_count}\n" 
-                f"• Interrompida há: {age} minutos\n\n"
-                f"Deseja visualizar detalhes para possível recuperação?",
-                icon='warning'
-            )
-            
-            if response:
-                show_recovery_details(recovery)
-                
-    except Exception as e:
-        logging.error(f"Erro no sistema de recovery: {e}")
-
-def show_recovery_details(recovery):
-    """Mostra detalhes da operação para recovery"""
-    details_window = tk.Toplevel(root)
-    details_window.title("Detalhes da Recuperação")
-    details_window.geometry("500x400")
-    
-    frame = ttk.Frame(details_window, padding="10")
-    frame.pack(fill="both", expand=True)
-    
-    # Informações da operação
-    data = recovery['data']
-    ttk.Label(frame, text="Detalhes da Operação Interrompida", 
-             font=("Segoe UI", 11, "bold")).pack(pady=(0, 10))
-    
-    info_text = f"""Tipo: {data.get('operation_type', 'N/A')}
-Arquivos processados: {len(data.get('files_processed', []))}
-Etapa: {data.get('current_step', 'N/A')}
-Idade: {recovery['age_minutes']} minutos
-
-Arquivos envolvidos:
-"""
-    
-    for i, file_path in enumerate(data.get('files_processed', [])[:10]):  # Mostra até 10 arquivos
-        info_text += f"  {i+1}. {os.path.basename(file_path)}\n"
-    
-    if len(data.get('files_processed', [])) > 10:
-        info_text += f"  ... e mais {len(data.get('files_processed', [])) - 10} arquivos\n"
-    
-    text_widget = tk.Text(frame, wrap="word", height=15, width=60)
-    text_widget.pack(fill="both", expand=True, pady=5)
-    text_widget.insert("1.0", info_text)
-    text_widget.config(state="disabled")
-    
-    # Botões de ação
-    button_frame = ttk.Frame(frame)
-    button_frame.pack(fill="x", pady=10)
-    
-    def cleanup_recovery():
-        try:
-            os.remove(recovery['file'])
-            details_window.destroy()
-            show_toast("Checkpoint de recovery removido")
-        except Exception as e:
-            messagebox.showerror("Erro", f"Falha ao remover checkpoint: {e}")
-    
-    ttk.Button(button_frame, text="Limpar Recovery", 
-              command=cleanup_recovery).pack(side="left", padx=5)
-    ttk.Button(button_frame, text="Fechar", 
-              command=details_window.destroy).pack(side="right", padx=5)
-
-
-def process_large_file_in_chunks(file_path, operation_callback, chunk_size=5*1024*1024):
-    """
-    Processa arquivos grandes em chunks para economizar memória
-    operation_callback: função que processa cada chunk (deve retornar dados processados)
-    """
-    temp_files = []
-    try:
-        file_size = os.path.getsize(file_path)
-        total_chunks = (file_size + chunk_size - 1) // chunk_size
-        
-        logging.info(f"Processando arquivo grande em chunks: {os.path.basename(file_path)} "
-                    f"({file_size/1024/1024:.1f}MB, {total_chunks} chunks)")
-        
-        with open(file_path, 'rb') as f:
-            for chunk_num in range(total_chunks):
-                if cancel_operation:
-                    raise PDFProcessingError("Operação cancelada pelo usuário")
-                
-                # Ler chunk
-                chunk_data = f.read(chunk_size)
-                if not chunk_data:
-                    break
-                
-                # Processar chunk usando a callback fornecida
-                processed_chunk = operation_callback(chunk_data, chunk_num, total_chunks)
-                
-                # Salvar chunk processado em arquivo temporário
-                temp_file = os.path.join(tempfile.gettempdir(), 
-                                       f"chunk_{chunk_num}_{os.getpid()}_{int(time.time())}.tmp")
-                with open(temp_file, 'wb') as temp_f:
-                    temp_f.write(processed_chunk)
-                
-                temp_files.append(temp_file)
-                add_temp_file(temp_file)
-                
-                # Atualizar progresso
-                progress = (chunk_num + 1) / total_chunks * 100
-                show_status(f"Processando chunk {chunk_num + 1}/{total_chunks} ({progress:.1f}%)", "info")
-                root.update_idletasks()
-        
-        return temp_files
-        
-    except Exception as e:
-        # Limpeza em caso de erro
-        for temp_file in temp_files:
-            try:
-                os.remove(temp_file)
-                remove_temp_file(temp_file)
-            except:
-                pass
-        raise PDFProcessingError(f"Erro no processamento por chunks: {e}")
-
 def exec_segura(cmd, timeout=300, descricao="", progress_widget=None):
-    """
-    Execução centralizada e segura de comandos - ELIMINA shell=True
-    """
-    # 🔒 CONVERSÃO OBRIGATÓRIA: string → lista
     if isinstance(cmd, str):
         import shlex
-        cmd = shlex.split(cmd)  # Divide string em lista segura
+        cmd = shlex.split(cmd)
     
     logging.info(f"Executando {descricao}: {' '.join(cmd)}")
     
     try:
-        # Configurar progresso se fornecido
         if progress_widget and hasattr(progress_widget, 'config'):
             progress_widget.config(mode="indeterminate")
             progress_widget.start(10)
         
-        # 🚨 CRÍTICO: shell=False SEMPRE
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True, 
             timeout=timeout,
-            shell=False,  # 🔒 IMPEDE SHELL INJECTION
+            shell=False,
             encoding='utf-8',
             errors='ignore'
         )
         
-        # Parar progresso
         if progress_widget and hasattr(progress_widget, 'stop'):
             progress_widget.stop()
             if hasattr(progress_widget, 'config'):
@@ -485,7 +233,6 @@ def exec_segura(cmd, timeout=300, descricao="", progress_widget=None):
         logging.error(f"Timeout em {descricao}")
         if progress_widget and hasattr(progress_widget, 'stop'):
             progress_widget.stop()
-        kill_ghostscript_processes()
         raise
     except Exception as e:
         logging.error(f"Erro em {descricao}: {e}")
@@ -493,412 +240,112 @@ def exec_segura(cmd, timeout=300, descricao="", progress_widget=None):
             progress_widget.stop()
         raise
 
-# =============================================================================
-# VALIDAÇÕES DE SEGURANÇA FORTALECIDAS
-# =============================================================================
 def validate_file_security(file_path):
-    """Validação completa de segurança do arquivo - VERSÃO CORRIGIDA"""
-    # Verificar se arquivo existe
     if not os.path.exists(file_path):
         raise SecurityError("Arquivo não existe")
     
-    # Tamanho máximo
     file_size = os.path.getsize(file_path)
     if file_size > MAX_FILE_SIZE:
         raise SecurityError(f"Arquivo muito grande ({file_size/1024/1024:.1f}MB > {MAX_FILE_SIZE/1024/1024}MB)")
     
-    # 🔥 CORREÇÃO CRÍTICA: Validação de nome de arquivo MAIS PERMISSIVA
-    # Permite caracteres comuns como (), $, -, _ mas ainda bloqueia injeção
     filename = os.path.basename(file_path)
     
-    # 🔒 Caracteres realmente perigosos (mantém segurança essencial)
     dangerous_patterns = [
-        '..',  # Path traversal
-        '|',   # Pipe injection
-        '&',   # Command injection  
-        ';',   # Command termination
-        '`',   # Command substitution
-        '\0',  # Null byte
-        '\r',  # Carriage return
-        '\n'   # New line
+        '..',
+        '|',
+        ';',
+        '`',
+        '\0',
+        '\r',
+        '\n'
     ]
     
     if any(pattern in file_path for pattern in dangerous_patterns):
         raise SecurityError("Nome de arquivo contém caracteres perigosos")
     
-    # 🔥 NOVO: Verificação de path traversal mais específica e robusta
     try:
-        # Normaliza o caminho e verifica se há tentativa de escape do diretório
         absolute_path = os.path.abspath(file_path)
         normalized_path = os.path.normpath(file_path)
         
-        # Verifica se após normalização ainda contém '..'
         if '..' in normalized_path or normalized_path != os.path.normpath(absolute_path):
             raise SecurityError("Tentativa de path traversal detectada")
             
     except Exception as e:
-        raise SecurityError(f"Erro ao validar caminho do arquivo: {e}")
+        raise SecurityError(f"Erro ao validar caminho: {e}")
     
-    # Verificar se é PDF pela assinatura
     try:
         with open(file_path, 'rb') as f:
             header = f.read(4)
             if header != b'%PDF':
-                raise SecurityError("Arquivo não é um PDF válido (assinatura inválida)")
+                raise SecurityError("Arquivo não é um PDF válido")
             
-            # 🔒 VERIFICAR JAVASCRIPT EMBUTIDO
             f.seek(0)
             first_chunk = f.read(4096)
             if b'/JavaScript' in first_chunk:
-                raise SecurityError("Arquivo PDF contém JavaScript incorporado - potencial risco de segurança")
+                raise SecurityError("PDF contém JavaScript - risco de segurança")
                 
     except Exception as e:
         raise SecurityError(f"Erro ao verificar arquivo: {e}")
 
-# =============================================================================
-# SISTEMA DE FALLBACK E RESILIÊNCIA
-# =============================================================================
-def resilient_pdf_operation(operation, fallback_operation, max_retries=3):
-    """Executa operação com fallback automático"""
-    for attempt in range(max_retries):
+def validate_split_limits(files, split_mode, options=None):
+    options = options or {}
+    
+    if len(files) > MAX_FILES_FOR_SPLIT:
+        raise SystemOverloadError(
+            f"Máximo de {MAX_FILES_FOR_SPLIT} arquivos para divisão. "
+            f"Selecionados: {len(files)}"
+        )
+    
+    total_input_pages = 0
+    total_output_files_estimate = 0
+    
+    for f in files:
         try:
-            performance_monitor.check_system_health()
-            return operation()
-        except (PDFProcessingError, SystemOverloadError) as e:
-            if attempt == max_retries - 1:
-                logging.warning(f"Falha na operação principal após {max_retries} tentativas, usando fallback: {e}")
-                return fallback_operation()
-            logging.info(f"Tentativa {attempt + 1} falhou, retentando: {e}")
-            time.sleep(1)  # Backoff simples
+            reader = safe_pdf_reader(f)
+            pages = len(reader.pages)
+            total_input_pages += pages
+            
+            if pages > MAX_PAGES_PER_FILE_FOR_SPLIT:
+                raise SystemOverloadError(
+                    f"Arquivo '{os.path.basename(f)}' tem {pages} páginas. "
+                    f"Máximo permitido para divisão: {MAX_PAGES_PER_FILE_FOR_SPLIT}"
+                )
+            
+            if split_mode == "all":
+                total_output_files_estimate += pages
+            elif split_mode == "extract":
+                page_ranges = options.get('page_ranges', [])
+                total_output_files_estimate += 1
+            elif split_mode == "interval":
+                interval = options.get('interval', 5)
+                total_output_files_estimate += (pages + interval - 1) // interval
+            elif split_mode == "parts":
+                parts = options.get('parts', 3)
+                total_output_files_estimate += min(parts, pages)
+                
         except Exception as e:
-            logging.error(f"Erro inesperado: {e}")
-            raise
-
-# =============================================================================
-# DETECÇÃO DE DEPENDÊNCIAS CRÍTICAS
-# =============================================================================
-def check_dependencies():
-    """Valida ambiente antes de iniciar GUI"""
-    issues = []
+            logging.warning(f"Erro ao validar arquivo {f}: {e}")
+            continue
     
-    # Crítico
-    if not PDF_LIBS_AVAILABLE:
-        issues.append("❌ PyPDF2 - FUNCIONALIDADES PRINCIPAIS DESABILITADAS")
-    
-    # Importante mas não crítico  
-    if not GHOSTSCRIPT_PATH:
-        issues.append("⚠️ Ghostscript - PDF/A e compressão desabilitados")
-    
-    if not PIKEPDF_AVAILABLE:
-        issues.append("⚠️ pikepdf - Algumas otimizações limitadas")
-    
-    if issues:
-        messagebox.showwarning(
-            "Verificação de Ambiente",
-            f"Recursos limitados:\n\n{chr(10).join(issues)}\n\n"
-            f"Soluções:\n"
-            f"• PyPDF2/pikepdf: Execute 'install.bat'\n"  
-            f"• Ghostscript: Baixe em https://ghostscript.com"
+    if total_input_pages > MAX_TOTAL_PAGES:
+        raise SystemOverloadError(
+            f"Total de {total_input_pages} páginas excede o limite de {MAX_TOTAL_PAGES}"
         )
-
-# =============================================================================
-# NOVO: SISTEMA DE VERIFICAÇÃO DE AMBIENTE DETALHADO
-# =============================================================================
-def get_environment_report():
-    """Gera relatório completo do ambiente"""
-    report = []
-    report.append("=" * 60)
-    report.append("RELATÓRIO DE AMBIENTE - JUNTAPDF")
-    report.append("=" * 60)
-    report.append(f"Data/Hora: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-    report.append(f"Python: {sys.version}")
-    report.append(f"Plataforma: {sys.platform}")
-    report.append("")
     
-    # Dependências principais
-    report.append("DEPENDÊNCIAS PRINCIPAIS:")
-    report.append(f"  PyPDF2: {'✓ DISPONÍVEL' if PDF_LIBS_AVAILABLE else '✗ NÃO ENCONTRADO'}")
-    report.append(f"  pikepdf: {'✓ DISPONÍVEL' if PIKEPDF_AVAILABLE else '✗ NÃO ENCONTRADO'}")
-    report.append(f"  tkinterdnd2: {'✓ DISPONÍVEL' if DND_AVAILABLE else '✗ NÃO ENCONTRADO'}")
-    report.append("")
-    
-    # Ghostscript
-    report.append("GHOSTSCRIPT:")
-    if GHOSTSCRIPT_PATH:
-        report.append(f"  Executável: {GHOSTSCRIPT_PATH}")
-        report.append(f"  Versão: {get_ghostscript_version()}")
-    else:
-        report.append("  ✗ NÃO ENCONTRADO")
-    report.append("")
-    
-    # Perfil ICC
-    report.append("PERFIL ICC:")
-    if ICC_PROFILE_PATH:
-        report.append(f"  Arquivo: {ICC_PROFILE_PATH}")
-        report.append(f"  Existe: {'✓ SIM' if os.path.exists(ICC_PROFILE_PATH) else '✗ NÃO'}")
-    else:
-        report.append("  ✗ NÃO ENCONTRADO")
-    report.append("")
-    
-    # PDF/A
-    report.append("PDF/A:")
-    report.append(f"  Disponível: {'✓ SIM' if PDFA_AVAILABLE else '✗ NÃO'}")
-    report.append("")
-    
-    # Diretórios
-    report.append("DIRETÓRIOS:")
-    report.append(f"  Temp: {tempfile.gettempdir()}")
-    report.append(f"  Logs: {os.path.join(tempfile.gettempdir(), 'JuntaPDF_Logs')}")
-    report.append("")
-    
-    # Limites
-    report.append("LIMITES CONFIGURADOS:")
-    report.append(f"  Máx. arquivos: {MAX_FILES_PER_OPERATION}")
-    report.append(f"  Máx. páginas: {MAX_TOTAL_PAGES}")
-    report.append(f"  Máx. tamanho: {MAX_FILE_SIZE/1024/1024} MB")
-    report.append("")
-    
-    # Status geral
-    status = "✅ AMBIENTE ADEQUADO" if PDF_LIBS_AVAILABLE and GHOSTSCRIPT_PATH else "⚠️ AMBIENTE COM LIMITAÇÕES"
-    report.append(f"STATUS: {status}")
-    
-    return "\n".join(report)
-
-def get_ghostscript_version():
-    """Obtém versão do Ghostscript"""
-    if not GHOSTSCRIPT_PATH:
-        return "N/A"
-    
-    try:
-        result = exec_segura([GHOSTSCRIPT_PATH, "--version"], 
-                           timeout=10, descricao="Ghostscript version")
-        if result.returncode == 0:
-            return result.stdout.strip()
-        else:
-            return "Erro ao obter versão"
-    except Exception as e:
-        return f"Erro: {e}"
-
-def show_environment_check():
-    """Mostra diálogo detalhado de verificação de ambiente"""
-    report = get_environment_report()
-    
-    # Criar janela de diálogo
-    dialog = tk.Toplevel()
-    dialog.title("Verificação de Ambiente - JuntaPDF")
-    dialog.geometry("700x600")
-    dialog.resizable(True, True)
-    dialog.transient(root)
-    dialog.grab_set()
-    
-    # Frame principal
-    main_frame = ttk.Frame(dialog, padding="10")
-    main_frame.pack(fill="both", expand=True)
-    
-    # Título
-    title_label = ttk.Label(main_frame, text="Relatório de Ambiente", 
-                           font=("Segoe UI", 12, "bold"))
-    title_label.pack(pady=(0, 10))
-    
-    # Área de texto com scroll
-    text_frame = ttk.Frame(main_frame)
-    text_frame.pack(fill="both", expand=True, pady=5)
-    
-    text_widget = tk.Text(text_frame, wrap="word", width=80, height=25,
-                         font=("Consolas", 9), bg="#f8f8f8")
-    scrollbar = ttk.Scrollbar(text_frame, orient="vertical", command=text_widget.yview)
-    text_widget.configure(yscrollcommand=scrollbar.set)
-    
-    text_widget.pack(side="left", fill="both", expand=True)
-    scrollbar.pack(side="right", fill="y")
-    
-    # Inserir relatório
-    text_widget.insert("1.0", report)
-    text_widget.config(state="disabled")  # Somente leitura
-    
-    # Frame de botões
-    button_frame = ttk.Frame(main_frame)
-    button_frame.pack(fill="x", pady=10)
-    
-    def copy_report():
-        """Copia relatório para área de transferência"""
-        dialog.clipboard_clear()
-        dialog.clipboard_append(report)
-        show_toast("Relatório copiado para área de transferência!")
-    
-    def save_report():
-        """Salva relatório em arquivo"""
-        filename = filedialog.asksaveasfilename(
-            defaultextension=".txt",
-            filetypes=[("Arquivos de texto", "*.txt"), ("Todos os arquivos", "*.*")],
-            title="Salvar Relatório de Ambiente",
-            initialfile=f"juntapdf_ambiente_{time.strftime('%Y%m%d_%H%M%S')}.txt"
+    if total_output_files_estimate > MAX_TOTAL_OUTPUT_FILES:
+        raise SystemOverloadError(
+            f"Operação geraria aproximadamente {total_output_files_estimate} arquivos. "
+            f"Máximo permitido: {MAX_TOTAL_OUTPUT_FILES}"
         )
-        if filename:
-            try:
-                with open(filename, 'w', encoding='utf-8') as f:
-                    f.write(report)
-                show_toast(f"Relatório salvo em: {filename}")
-            except Exception as e:
-                messagebox.showerror("Erro", f"Erro ao salvar relatório:\n{e}")
     
-    def open_ghostscript_download():
-        """Abre página de download do Ghostscript"""
-        webbrowser.open("https://www.ghostscript.com/download/gsdnld.html")
-    
-    # Botões
-    ttk.Button(button_frame, text="📋 Copiar Relatório", 
-              command=copy_report).pack(side="left", padx=5)
-    ttk.Button(button_frame, text="💾 Salvar em Arquivo", 
-              command=save_report).pack(side="left", padx=5)
-    
-    if not GHOSTSCRIPT_PATH:
-        ttk.Button(button_frame, text="🌐 Baixar Ghostscript", 
-                  command=open_ghostscript_download).pack(side="left", padx=5)
-    
-    ttk.Button(button_frame, text="Fechar", 
-              command=dialog.destroy).pack(side="right", padx=5)
-    
-    # Focar na diálogo
-    dialog.focus_set()
-
-def show_performance_dashboard():
-    """Mostra métricas de performance do sistema"""
-    dialog = tk.Toplevel(root)
-    dialog.title("Dashboard de Performance - JuntaPDF")
-    dialog.geometry("500x400")
-    dialog.resizable(False, False)
-    dialog.transient(root)
-    dialog.grab_set()
-
-    # Frame principal
-    main_frame = ttk.Frame(dialog, padding="15")
-    main_frame.pack(fill="both", expand=True)
-
-    # Título
-    title_label = ttk.Label(
-        main_frame, 
-        text="📊 Dashboard de Performance", 
-        font=("Segoe UI", 12, "bold")
-    )
-    title_label.pack(pady=(0, 15))
-
-    # Frame das métricas
-    metrics_frame = ttk.LabelFrame(main_frame, text="Métricas do Sistema", padding="10")
-    metrics_frame.pack(fill="both", expand=True, pady=5)
-    
-    if not PSUtil_AVAILABLE:
-        warning_frame = ttk.Frame(metrics_frame)
-        warning_frame.pack(fill="x", padx=5, pady=5)
-        
-        ttk.Label(
-            warning_frame, 
-            text="⚠️ Métricas limitadas - instale 'pip install psutil' para monitoramento completo",
-            foreground="orange",
-            font=("Segoe UI", 8, "bold"),
-            justify="center"
-        ).pack()
-
-    # Coletar métricas MELHORADAS
-    try:
-        import psutil
-        process = psutil.Process()
-        memory_mb = process.memory_info().rss / 1024 / 1024
-        cpu_percent = process.cpu_percent(interval=0.1)
-        thread_count = process.num_threads()
-    except ImportError:
-        memory_mb = "N/A (instale psutil)"
-        cpu_percent = "N/A"
-        thread_count = "N/A"
-
-    metrics = {
-        "📁 Arquivos em Cache": f"{len(pdf_metadata_cache)}",
-        "🧵 Threads Ativas": f"{thread_count}",
-        "💾 Memória Utilizada": f"{memory_mb:.1f} MB" if isinstance(memory_mb, float) else memory_mb,
-        "⚡ CPU em Uso": f"{cpu_percent}%" if isinstance(cpu_percent, float) else cpu_percent,
-        "📊 Arquivos Temporários": f"{len(temp_files_global)}",
-        "🔄 Operações Canceladas": "0",  # Poderia implementar contador
-        "✅ PDFs Válidos": f"{sum(1 for f in pdf_metadata_cache if 'Erro' not in f)}",
-        "❌ PDFs com Erro": f"{sum(1 for f in pdf_metadata_cache if 'Erro' in f)}"
-    }
-
-    # Exibir métricas em grid
-    for i, (k, v) in enumerate(metrics.items()):
-        ttk.Label(metrics_frame, text=k, font=("Segoe UI", 9, "bold")).grid(
-            row=i, column=0, sticky="w", padx=5, pady=3
+    if split_mode == "all" and total_input_pages > MAX_PAGES_FOR_SINGLE_FILE_SPLIT:
+        raise SystemOverloadError(
+            f"Divisão página-a-página limitada a {MAX_PAGES_FOR_SINGLE_FILE_SPLIT} páginas. "
+            f"Total: {total_input_pages}"
         )
-        ttk.Label(metrics_frame, text=str(v), font=("Consolas", 9)).grid(
-            row=i, column=1, sticky="w", padx=10, pady=3
-        )
-
-    # Botões de ação
-    button_frame = ttk.Frame(main_frame)
-    button_frame.pack(fill="x", pady=15)
-
-    def clear_cache():
-        """Limpa o cache de metadados"""
-        pdf_metadata_cache.clear()
-        show_toast("Cache limpo!")
-        dialog.destroy()
-        show_performance_dashboard()  # Recarrega
-
-    def cleanup_temp_files_manual():
-        """Limpeza manual de arquivos temporários"""
-        cleanup_temp_files()
-        show_toast("Arquivos temporários limpos!")
-        dialog.destroy()
-        show_performance_dashboard()
-
-    ttk.Button(button_frame, text="🔄 Atualizar", 
-              command=lambda: dialog.destroy() or show_performance_dashboard()).pack(side="left", padx=5)
     
-    ttk.Button(button_frame, text="🧹 Limpar Cache", 
-              command=clear_cache).pack(side="left", padx=5)
-    
-    ttk.Button(button_frame, text="🗑️ Limpar Temporários", 
-              command=cleanup_temp_files_manual).pack(side="left", padx=5)
-    
-    ttk.Button(button_frame, text="Fechar", 
-              command=dialog.destroy).pack(side="right", padx=5)
+    return total_input_pages, total_output_files_estimate
 
-    # Focar na diálogo
-    dialog.focus_set()
-    
-# Handler de exceções global
-def handle_exception(exc_type, exc_value, exc_traceback):
-    if issubclass(exc_type, KeyboardInterrupt):
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
-        return
-    
-    error_msg = f"Erro não tratado:\n\nTipo: {exc_type.__name__}\nMensagem: {str(exc_value)}"
-    logging.error(f"Exceção não tratada: {exc_type.__name__}: {exc_value}", exc_info=True)
-    
-    print(error_msg)
-    try:
-        tk.messagebox.showerror("Erro", error_msg)
-    except:
-        pass
-
-sys.excepthook = handle_exception
-
-# =============================================================================
-# THREAD POOL SEGURO
-# =============================================================================
-thread_executor = concurrent.futures.ThreadPoolExecutor(
-    max_workers=MAX_CONCURRENT_OPERATIONS,
-    thread_name_prefix="JuntaPDF"
-)
-
-def submit_thread_task(func, *args, **kwargs):
-    """Submete tarefa para execução com limites de recursos"""
-    performance_monitor.check_system_health()
-    return thread_executor.submit(func, *args, **kwargs)
-
-# =============================================================================
-# INICIALIZAÇÃO DE BIBLIOTECAS
-# =============================================================================
-
-# Verificação do tkinterdnd2
 DND_AVAILABLE = False
 try:
     from tkinterdnd2 import DND_FILES, TkinterDnD
@@ -906,9 +353,8 @@ try:
     logging.info("tkinterdnd2 disponível")
 except ImportError:
     DND_AVAILABLE = False
-    logging.warning("tkinterdnd2 não disponível - arrastar/soltar desabilitado")
+    logging.warning("tkinterdnd2 não disponível")
 
-# Tenta importar PyPDF2
 try:
     from PyPDF2 import PdfMerger, PdfReader, PdfWriter
     PDF_LIBS_AVAILABLE = True
@@ -916,90 +362,40 @@ try:
 except ImportError as e:
     PDF_LIBS_AVAILABLE = False  
     logging.error(f"PyPDF2 não disponível: {e}")
-    messagebox.showerror("Erro", "PyPDF2 é necessário para o funcionamento do programa!\n\nExecute o instalador 'install.bat' primeiro.")
-    sys.exit(1)
 
-# Tenta importar pikepdf
 try:
     import pikepdf
     PIKEPDF_AVAILABLE = True
     logging.info("pikepdf disponível")
 except ImportError:
     PIKEPDF_AVAILABLE = False
-    logging.warning("pikepdf não disponível - algumas funcionalidades estarão limitadas")
+    logging.warning("pikepdf não disponível")
 
-# Criar janela principal
-try:
-    if DND_AVAILABLE:
-        root = TkinterDnD.Tk()
-        logging.info("Janela criada com suporte a Drag & Drop")
-    else:
-        root = tk.Tk()
-        logging.info("Janela criada sem suporte a Drag & Drop")
-except Exception as e:
-    logging.error(f"Erro ao criar janela: {e}")
-    root = tk.Tk()
-    DND_AVAILABLE = False
-
-# =============================================================================
-# VARIÁVEIS GLOBAIS
-# =============================================================================
-
-# Flag global para cancelamento
 cancel_operation = False
 
-# --- VARIÁVEIS PARA ESTATÍSTICAS ---
-total_files_merge_var = tk.StringVar(value="Arquivos: 0")
-total_pages_merge_var = tk.StringVar(value="Páginas: 0") 
-total_size_merge_var = tk.StringVar(value="Tamanho: 0 MB")
+total_files_merge_var = None
+total_pages_merge_var = None
+total_size_merge_var = None
+total_files_split_var = None
+total_pages_split_var = None
+total_size_split_var = None
+merge_badge_var = None
+split_badge_var = None
+split_all_var = None
+protect_var = None
+pdfa_var = None
+pdfa_var_split = None
+compress_var = None
+meta_var = None
+split_mode_var = None
+split_interval_var = None
+split_parts_var = None
+status_var = None
+compress_level = None
 
-total_files_split_var = tk.StringVar(value="Arquivos: 0")
-total_pages_split_var = tk.StringVar(value="Páginas: 0") 
-total_size_split_var = tk.StringVar(value="Tamanho: 0 MB")
-
-# 🔒 CORREÇÃO 2: LOCK PARA TEMP FILES
-temp_files_global = []
-temp_files_lock = threading.Lock()
-
-def add_temp_file(file_path):
-    """Adiciona arquivo temporário com lock - VERSÃO CORRIGIDA"""
-    with temp_files_lock:
-        if file_path not in temp_files_global:
-            temp_files_global.append(file_path)
-            logging.debug(f"Arquivo temporário registrado: {file_path}")
-
-def remove_temp_file(file_path):
-    """Remove arquivo temporário com lock - VERSÃO CORRIGIDA"""
-    with temp_files_lock:
-        if file_path in temp_files_global:
-            temp_files_global.remove(file_path)
-            logging.debug(f"Arquivo temporário removido: {file_path}")
-
-# Variáveis para os badges
-merge_badge_var = tk.StringVar(value="")
-split_badge_var = tk.StringVar(value="")
-
-# Variáveis de controle
-split_all_var = tk.BooleanVar(value=False)
-protect_var = tk.BooleanVar(value=False)
-pdfa_var = tk.BooleanVar(value=False)
-pdfa_var_split = tk.BooleanVar(value=False)
-compress_var = tk.BooleanVar(value=False)
-meta_var = tk.BooleanVar(value=False)
-
-# Variáveis para os novos modos de divisão
-split_mode_var = tk.StringVar(value="extract")  # "extract", "all", "interval", "parts"
-split_interval_var = tk.StringVar(value="5")
-split_parts_var = tk.StringVar(value="3")
-
-# Variável de status global - DEFINIDA ANTES DE QUALQUER USO
-status_var = tk.StringVar()
-
-# Variável para nível de compressão
-compress_level = tk.StringVar(value="Otimização Automática")
+pdf_metadata_cache = {}
 
 def safe_temp_file(prefix="temp", suffix=".pdf"):
-    """Cria arquivo temporário seguro"""
     import tempfile
     temp_file = tempfile.NamedTemporaryFile(
         prefix=prefix, 
@@ -1010,28 +406,22 @@ def safe_temp_file(prefix="temp", suffix=".pdf"):
     temp_file.close()
     add_temp_file(temp_path)
     return temp_path
-    
-def estimate_final_size(files, options):
-    """Estima tamanho final do arquivo"""
-    total_size = 0
-    for f in files:
-        if os.path.exists(f):
-            total_size += os.path.getsize(f)
-    
-    if options.get('compress'):
-        # Estimativa conservadora de compressão
-        reduction_factor = 0.7  # 30% de redução
-        total_size *= reduction_factor
-    
-    return max(total_size, 1024)  # Mínimo 1KB
-# =============================================================================
-# 🚨 CORREÇÃO CRÍTICA 1: CLEANUP ROBUSTO COM REGISTRO ÚNICO
-# =============================================================================
+
+def add_temp_file(file_path):
+    with temp_files_lock:
+        if file_path not in temp_files_global:
+            temp_files_global.append(file_path)
+            logging.debug(f"Arquivo temporário registrado: {file_path}")
+
+def remove_temp_file(file_path):
+    with temp_files_lock:
+        if file_path in temp_files_global:
+            temp_files_global.remove(file_path)
+            logging.debug(f"Arquivo temporário removido: {file_path}")
+
 def cleanup_temp_files():
-    """Limpa arquivos temporários ao fechar o programa e encerra o executor com timeout seguro."""
     logging.info("Iniciando limpeza de arquivos temporários")
     
-    # Remove arquivos temporários rastreados
     with temp_files_lock:
         files_to_clean = list(temp_files_global)
         
@@ -1043,46 +433,38 @@ def cleanup_temp_files():
         except Exception as e:
             logging.warning(f"Erro ao limpar {temp_file}: {e}")
 
-    # Limpar checkpoint
     try:
         cleanup_checkpoint()
     except Exception as e:
         logging.warning(f"Erro ao limpar checkpoint: {e}")
 
-    # Parar thread executor com fallback caso a versão do Python não aceite timeout
     try:
-        thread_executor.shutdown(wait=True, timeout=5)
+        if 'thread_executor' in globals():
+            thread_executor.shutdown(wait=True, timeout=5)
     except TypeError:
-        # Algumas versões não suportam timeout no shutdown; tenta sem timeout
         try:
-            thread_executor.shutdown(wait=True)
+            if 'thread_executor' in globals():
+                thread_executor.shutdown(wait=True)
         except Exception as e:
             logging.warning(f"Falha ao encerrar thread_executor: {e}")
     except Exception as e:
         logging.warning(f"Erro ao encerrar thread_executor: {e}")
 
-# Registrar a limpeza automática UMA ÚNICA VEZ
 if not _atexit_cleanup_registered:
     atexit.register(cleanup_temp_files)
     _atexit_cleanup_registered = True
     logging.info("Cleanup registrado no atexit")
 
-# =============================================================================
-# 🚨 CORREÇÃO CRÍTICA 2: GERENCIAMENTO SEGURO DE WIDGETS
-# =============================================================================
 def widget_exists(widget):
-    """Verifica se um widget existe e é válido"""
     try:
         return widget is not None and hasattr(widget, "winfo_exists") and widget.winfo_exists()
     except Exception:
         return False
 
 def safe_widget_config(widget, **kwargs):
-    """Configura um widget apenas se ele existir e for válido."""
     try:
         if widget is None:
             return False
-        # winfo_exists pode levantar em alguns cenários; proteger com try
         if hasattr(widget, "winfo_exists") and widget.winfo_exists():
             try:
                 widget.config(**kwargs)
@@ -1093,61 +475,14 @@ def safe_widget_config(widget, **kwargs):
         return False
     return False
 
-# =============================================================================
-# 🚨 CORREÇÃO 2: GERENCIAMENTO DE PROCESSOS GHOSTSCRIPT ROBUSTO (I18N)
-# =============================================================================
-def kill_ghostscript_processes():
-    """Mata processos Ghostscript de forma robusta (multilíngue)"""
-    try:
-        killed = 0
-        
-        # Windows
-        if sys.platform == "win32":
-            # ✅ ROBUSTO: taskkill retorna 0 se matou algo, 128 se não encontrou
-            result1 = exec_segura(["taskkill", "/f", "/im", "gswin64c.exe"], 
-                                timeout=10, descricao="Kill gswin64c")
-            result2 = exec_segura(["taskkill", "/f", "/im", "gswin32c.exe"], 
-                                timeout=10, descricao="Kill gswin32c")
-            
-            # ✅ CORRETO: returncode == 0 significa SUCESSO (qualquer idioma)
-            if result1.returncode == 0 or result2.returncode == 0:
-                killed = 1
-                logging.info("Processos Ghostscript finalizados no Windows")
-            else:
-                logging.info("Nenhum processo Ghostscript encontrado para finalizar")
-                
-        # Linux/Mac
-        else:
-            result = exec_segura(["pkill", "-f", "gs"], 
-                               timeout=10, descricao="Kill gs processes")
-            
-            # ✅ pkill retorna 0 se matou processos, 1 se não encontrou
-            if result.returncode == 0:
-                killed = 1
-                logging.info("Processos Ghostscript finalizados no Linux/Mac")
-            else:
-                logging.info("Nenhum processo Ghostscript encontrado para finalizar")
-                
-        return killed
-        
-    except Exception as e:
-        logging.error(f"Erro ao finalizar processos Ghostscript: {e}")
-        return 0
-
-# -----------------------
-# GHOSTSCRIPT E ICC - DETECÇÃO AUTOMÁTICA
-# -----------------------
 def encontrar_ghostscript():
-    """Localiza o executável do Ghostscript no sistema."""
-    logging.info("Procurando Ghostscript no sistema...")
-    # Tenta encontrar no PATH
+    logging.info("Procurando Ghostscript...")
     for cmd in ("gswin64c", "gswin32c", "gs"):
         caminho = shutil.which(cmd)
         if caminho:
-            logging.info(f"Ghostscript encontrado no PATH: {caminho}")
+            logging.info(f"Ghostscript encontrado: {caminho}")
             return caminho
 
-    # Procura em pastas comuns do Windows
     possiveis_pastas = [
         r"C:\Program Files\gs",
         r"C:\Program Files (x86)\gs",
@@ -1162,24 +497,18 @@ def encontrar_ghostscript():
             versoes = glob.glob(os.path.join(base, "gs*", "bin", "gswin32c.exe"))
         if versoes:
             versoes.sort(reverse=True)
-            logging.info(f"Ghostscript encontrado em: {versoes[0]}")
+            logging.info(f"Ghostscript encontrado: {versoes[0]}")
             return versoes[0]
 
-    logging.warning("Ghostscript não encontrado no sistema")
+    logging.warning("Ghostscript não encontrado")
     return None
 
 def encontrar_perfil_icc(gs_exec):
-    """
-    Encontra o perfil ICC sRGB que vem com o Ghostscript.
-    Busca automaticamente baseado na localização do executável.
-    """
     if not gs_exec:
         return None
     
-    # Deriva o diretório base do Ghostscript
-    gs_dir = os.path.dirname(os.path.dirname(gs_exec))  # sobe 2 níveis de /bin/
-    
-    # Locais possíveis do perfil ICC
+    gs_dir = os.path.dirname(os.path.dirname(gs_exec))
+
     possible_paths = [
         os.path.join(gs_dir, "iccprofiles", "srgb.icc"),
         os.path.join(gs_dir, "iccprofiles", "default_rgb.icc"),
@@ -1187,145 +516,36 @@ def encontrar_perfil_icc(gs_exec):
         os.path.join(gs_dir, "Resource", "ColorSpace", "sRGB.icc"),
     ]
     
-    # Verifica se algum existe
     for icc_path in possible_paths:
         if os.path.exists(icc_path):
             logging.info(f"Perfil ICC encontrado: {icc_path}")
             return icc_path
     
-    # Busca recursiva na pasta do Ghostscript (última tentativa)
     try:
-        for root, dirs, files in os.walk(gs_dir):
+        for root_dir, dirs, files in os.walk(gs_dir):
             for file in files:
                 if file.lower() in ("srgb.icc", "default_rgb.icc"):
-                    found_path = os.path.join(root, file)
-                    logging.info(f"Perfil ICC encontrado (busca recursiva): {found_path}")
+                    found_path = os.path.join(root_dir, file)
+                    logging.info(f"Perfil ICC encontrado: {found_path}")
                     return found_path
     except Exception as e:
-        logging.warning(f"Erro na busca recursiva por ICC: {e}")
+        logging.warning(f"Erro na busca recursiva: {e}")
     
     logging.warning("Perfil ICC não encontrado")
     return None
 
-def validate_file_security(file_path):
-    """
-    Valida segurança do arquivo antes do processamento
-    CORREÇÃO: Esta função estava FALTANDO no código original
-    """
-    # Verificar se arquivo existe
-    if not os.path.exists(file_path):
-        raise SecurityError(f"Arquivo não existe: {file_path}")
-    
-    # Verificar tamanho máximo
-    file_size = os.path.getsize(file_path)
-    if file_size > MAX_FILE_SIZE:
-        raise SecurityError(f"Arquivo muito grande: {file_size/1024/1024:.1f}MB > {MAX_FILE_SIZE/1024/1024:.1f}MB")
-    
-    # Verificar se é PDF pela assinatura
-    try:
-        with open(file_path, 'rb') as f:
-            header = f.read(4)
-            if header != b'%PDF':
-                raise SecurityError("Arquivo não é um PDF válido")
-    except Exception as e:
-        raise SecurityError(f"Erro ao validar arquivo: {e}")
-    
-    return True
-    
-class ThreadManager:
-    """Gerencia threads de forma segura - CORREÇÃO: Esta classe estava FALTANDO"""
-    def __init__(self):
-        self.executor = None
-        self.lock = threading.RLock()
-        
-    def submit_task(self, task_function):
-        """Submete tarefa para execução em thread"""
-        with self.lock:
-            if self.executor is None:
-                self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
-            return self.executor.submit(task_function)
-    
-    def shutdown(self):
-        """Finaliza executor de threads"""
-        with self.lock:
-            if self.executor is not None:
-                self.executor.shutdown(wait=False)
-                self.executor = None
-
-# Instância global do gerenciador de threads
-thread_manager = ThreadManager()
-
-def submit_thread_task(task_function):
-    """Submete tarefa para thread de forma segura"""
-    return thread_manager.submit_task(task_function)
-
-def validate_output_pdf(file_path):
-    """Valida se o PDF de saída é válido e legível"""
-    try:
-        # Verificar se arquivo existe e tem tamanho razoável
-        if not os.path.exists(file_path):
-            return False, "Arquivo de saída não existe"
-        
-        file_size = os.path.getsize(file_path)
-        if file_size == 0:
-            return False, "Arquivo de saída está vazio"
-        
-        if file_size < 100:  # PDF mínimo tem pelo menos 100 bytes
-            return False, "Arquivo de saída é muito pequeno para ser um PDF válido"
-        
-        with open(file_path, 'rb') as f:
-            # Verificar assinatura PDF
-            header = f.read(4)
-            if header != b'%PDF':
-                return False, "Arquivo de saída não é um PDF válido (assinatura incorreta)"
-            
-            # Verificar se é legível
-            try:
-                f.seek(0)
-                reader = PdfReader(f)
-                
-                if len(reader.pages) == 0:
-                    return False, "PDF de saída não contém páginas"
-                
-                # Tentar acessar metadados básicos (não crítico se falhar)
-                try:
-                    _ = reader.metadata
-                except:
-                    logging.debug("Metadados do PDF não acessíveis (pode ser normal)")
-                
-                # Verificar algumas páginas para garantir que são acessíveis
-                pages_to_check = min(3, len(reader.pages))
-                for i in range(pages_to_check):
-                    try:
-                        _ = reader.pages[i].extract_text()
-                    except:
-                        # Não crítico se não conseguir extrair texto
-                        pass
-                        
-            except Exception as e:
-                return False, f"PDF de saída corrompido ou ilegível: {str(e)}"
-        
-        return True, f"PDF válido ({len(reader.pages)} páginas, {file_size/1024/1024:.2f} MB)"
-        
-    except Exception as e:
-        return False, f"Erro na validação: {str(e)}"
-# Detecta Ghostscript e ICC na inicialização
 GHOSTSCRIPT_PATH = encontrar_ghostscript()
 ICC_PROFILE_PATH = encontrar_perfil_icc(GHOSTSCRIPT_PATH) if GHOSTSCRIPT_PATH else None
 PDFA_AVAILABLE = bool(GHOSTSCRIPT_PATH and ICC_PROFILE_PATH)
 
-def comprimir_com_ghostscript(input_path, output_path, nivel="Otimização Automática"):
-    """
-    Compressão REAL de PDF usando Ghostscript com diferentes níveis
-    """
+def comprimir_com_ghostscript(input_path, output_path, nivel="Qualidade Máxima"):
     if not GHOSTSCRIPT_PATH:
-        raise PDFProcessingError("Ghostscript não disponível para compressão")
+        raise PDFProcessingError("Ghostscript não disponível")
     
-    # Mapeamento de níveis de compressão
     niveis = {
-        "Qualidade Máxima": "/printer",      # Balanço ideal qualidade/tamanho
-        "Qualidade Equilibrada": "/ebook",      # Boa qualidade, menor tamanho  
-        "Tamanho Mínimo": "/screen"           # Tamanho mínimo, qualidade reduzida
+        "Qualidade Máxima": "/printer",
+        "Qualidade Equilibrada": "/ebook",
+        "Tamanho Mínimo": "/screen"
     }
     
     comando = [
@@ -1341,17 +561,16 @@ def comprimir_com_ghostscript(input_path, output_path, nivel="Otimização Autom
         input_path
     ]
     
-    logging.info(f"Iniciando compressão: {os.path.basename(input_path)} -> {nivel}")
+    logging.info(f"Iniciando compressão: {os.path.basename(input_path)}")
     resultado = exec_segura(comando, timeout=120, descricao="Compressão Ghostscript")
     
     if resultado.returncode != 0:
         error_msg = resultado.stderr or "Erro desconhecido"
-        logging.error(f"Falha na compressão Ghostscript: {error_msg}")
+        logging.error(f"Falha na compressão: {error_msg}")
         raise PDFProcessingError(f"Falha na compressão: {error_msg}")
     
-    # Verificar se arquivo de saída foi criado
     if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
-        raise PDFProcessingError("Arquivo comprimido não foi gerado ou está vazio")
+        raise PDFProcessingError("Arquivo comprimido não foi gerado")
     
     tamanho_original = os.path.getsize(input_path) / 1024 / 1024
     tamanho_comprimido = os.path.getsize(output_path) / 1024 / 1024
@@ -1362,17 +581,51 @@ def comprimir_com_ghostscript(input_path, output_path, nivel="Otimização Autom
     return reducao
 
 if PDFA_AVAILABLE:
-    logging.info("PDF/A disponível: Ghostscript e ICC encontrados")
+    logging.info("PDF/A disponível")
 else:
-    logging.warning("PDF/A indisponível: Ghostscript ou ICC não encontrados")
+    logging.warning("PDF/A indisponível")
 
-# =============================================================================
-# FUNÇÕES AUXILIARES DA INTERFACE
-# =============================================================================
+thread_executor = concurrent.futures.ThreadPoolExecutor(
+    max_workers=MAX_CONCURRENT_OPERATIONS,
+    thread_name_prefix="JuntaPDF"
+)
 
-# -----------------------
-# ToolTip / Toast helper
-# -----------------------
+def submit_thread_task(func, *args, **kwargs):
+    performance_monitor.check_system_health()
+    
+    def task_with_timeout():
+        try:
+            import threading
+            result = [None]
+            exception = [None]
+            
+            def worker():
+                try:
+                    result[0] = func(*args, **kwargs)
+                except Exception as e:
+                    exception[0] = e
+            
+            thread = threading.Thread(target=worker)
+            thread.daemon = True
+            thread.start()
+            thread.join(timeout=300)
+            
+            if thread.is_alive():
+                logging.error("Timeout na operação em thread")
+                raise SystemOverloadError("Operação excedeu o tempo limite")
+            
+            if exception[0]:
+                raise exception[0]
+                
+            return result[0]
+            
+        except Exception as e:
+            logging.error(f"Erro na tarefa em thread: {e}")
+            root.after(0, reset_ui_state)
+            raise
+    
+    return thread_executor.submit(task_with_timeout)
+
 class ToolTip:
     def __init__(self, widget, text=""):
         self.widget = widget
@@ -1432,9 +685,7 @@ class ToolTip:
             self.tipwindow = None
 
 def show_toast(message, duration=2000):
-    """Mostra toast apenas se não houver messagebox ativo"""
     try:
-        # Verifica se há algum messagebox ativo
         for widget in root.winfo_children():
             if isinstance(widget, tk.Toplevel) and any(isinstance(child, tk.Message) for child in widget.winfo_children()):
                 logging.debug("Messagebox detectado - suprimindo toast")
@@ -1444,107 +695,119 @@ def show_toast(message, duration=2000):
         toast.overrideredirect(True)
         toast.configure(bg="#333333")
         toast.attributes("-topmost", True)
+        toast.attributes('-alpha', 0.0)
         label = tk.Label(toast, text=message, fg="white", bg="#333333", font=("Segoe UI", 10))
         label.pack(ipadx=10, ipady=5)
         x = root.winfo_rootx() + 20
         y = root.winfo_rooty() + root.winfo_height() - 50
         toast.geometry(f"+{x}+{y}")
-        toast.after(duration, toast.destroy)
+        
+        def fade_in_toast(alpha=0.0):
+            if alpha < 1.0:
+                toast.attributes('-alpha', alpha)
+                toast.after(20, lambda: fade_in_toast(alpha + 0.1))
+            else:
+                toast.attributes('-alpha', 1.0)
+                toast.after(duration, fade_out_toast)
+        
+        def fade_out_toast(alpha=1.0):
+            if alpha > 0.0:
+                toast.attributes('-alpha', alpha)
+                toast.after(20, lambda: fade_out_toast(alpha - 0.1))
+            else:
+                toast.destroy()
+        
+        fade_in_toast()
         logging.debug(f"Toast exibido: {message}")
     except Exception as e:
         logging.warning(f"Erro ao exibir toast: {e}")
 
-def abrir_pasta_output(folder):
-    """Abre a pasta de saída no explorador de arquivos"""
-    try:
-        if sys.platform == "win32":
-            os.startfile(folder)
-        elif sys.platform == "darwin":  # macOS
-            subprocess.call(["open", folder])
-        else:  # Linux
-            subprocess.call(["xdg-open", folder])
-        logging.info(f"Pasta aberta: {folder}")
-    except Exception as e:
-        logging.error(f"Erro ao abrir pasta: {e}")
-        show_toast("Erro ao abrir pasta de saída")
-
-def debounce(wait):
-    """Decorator para debounce de funções (evita múltiplas execuções rápidas)"""
-    def decorator(fn):
-        def debounced(*args, **kwargs):
-            def call_it():
-                fn(*args, **kwargs)
-            if hasattr(debounced, '_timer'):
-                debounced._timer.cancel()
-            debounced._timer = threading.Timer(wait, call_it)
-            debounced._timer.start()
-        return debounced
-    return decorator
-
-# Aplicar debounce a funções pesadas
-def process_in_batches(file_list, batch_size=10):
-    """Processa muitos arquivos em lotes para evitar sobrecarga"""
-    for i in range(0, len(file_list), batch_size):
-        batch = file_list[i:i + batch_size]
-        yield batch
-        # Pequena pausa entre lotes
-        time.sleep(0.5)
-        if cancel_operation:
-            break
-@debounce(0.3)
-def update_stats_debounced(listbox, files_var, pages_var, size_var):
-    update_stats(listbox, files_var, pages_var, size_var)
-
-# -----------------------
-# Validação de PDFs SEGURA
-# -----------------------
 def safe_pdf_reader(file_path):
-    """Wrapper seguro para ler PDFs potencialmente corrompidos"""
     try:
         validate_file_security(file_path)
         
         with open(file_path, 'rb') as f:
-            # Verificar assinatura PDF novamente
             if f.read(4) != b'%PDF':
                 raise PDFCorruptionError("Arquivo não é um PDF válido")
             
         reader = PdfReader(file_path)
-        # Tentar acessar propriedades críticas
         _ = len(reader.pages)
         _ = reader.metadata
         
         return reader
     except Exception as e:
-        logging.error(f"PDF corrompido ou inválido: {file_path} - {e}")
-        raise PDFCorruptionError(f"PDF corrompido ou inválido: {os.path.basename(file_path)}")
+        logging.error(f"PDF corrompido: {file_path} - {e}")
+        raise PDFCorruptionError(f"PDF corrompido: {os.path.basename(file_path)}")
 
 def validate_pdf(path):
-    """Valida se o PDF é legível e não está corrompido."""
     try:
-        # Validação de segurança primeiro
         validate_file_security(path)
-        
-        # Agora valida o conteúdo do PDF
         reader = safe_pdf_reader(path)
         _ = len(reader.pages)
         return True, None
     except (SecurityError, PDFCorruptionError) as e:
-        logging.warning(f"PDF inválido ou inseguro: {path} - {e}")
+        logging.warning(f"PDF inválido: {path} - {e}")
         return False, str(e)
     except Exception as e:
         logging.warning(f"PDF inválido: {path} - {e}")
         return False, str(e)
 
-# -----------------------
-# Função para atualizar estatísticas
-# -----------------------
+def validate_output_pdf(file_path, password=None):
+    try:
+        if not os.path.exists(file_path):
+            return False, "Arquivo de saída não existe"
+        
+        file_size = os.path.getsize(file_path)
+        if file_size == 0:
+            return False, "Arquivo de saída está vazio"
+        
+        if file_size < 100:
+            return False, "Arquivo muito pequeno"
+        
+        with open(file_path, 'rb') as f:
+            header = f.read(4)
+            if header != b'%PDF':
+                return False, "Não é um PDF válido"
+            
+            try:
+                f.seek(0)
+                reader = PdfReader(f)
+                
+                if reader.is_encrypted:
+                    if password is not None:
+                        if reader.decrypt(password) == 0:
+                            return False, "Senha incorreta ou falha na descriptografia"
+                    else:
+                        return False, "PDF criptografado, mas nenhuma senha fornecida"
+                
+                if len(reader.pages) == 0:
+                    return False, "PDF não contém páginas"
+                
+                try:
+                    _ = reader.metadata
+                except:
+                    logging.debug("Metadados não acessíveis")
+                
+                pages_to_check = min(3, len(reader.pages))
+                for i in range(pages_to_check):
+                    try:
+                        _ = reader.pages[i].extract_text()
+                    except:
+                        pass
+                        
+            except Exception as e:
+                return False, f"PDF corrompido: {str(e)}"
+        
+        return True, f"PDF válido ({len(reader.pages)} páginas, {file_size/1024/1024:.2f} MB)"
+        
+    except Exception as e:
+        return False, f"Erro na validação: {str(e)}"
+
 def update_stats(listbox, files_var, pages_var, size_var):
-    """Atualiza estatísticas baseadas nos arquivos da listbox"""
     files = list(listbox.get(0, tk.END))
     total_pages = 0
     total_size_bytes = 0
     
-    # Limite de arquivos para prevenir sobrecarga
     if len(files) > MAX_FILES_PER_OPERATION:
         files = files[:MAX_FILES_PER_OPERATION]
         logging.warning(f"Limite de {MAX_FILES_PER_OPERATION} arquivos excedido")
@@ -1555,29 +818,23 @@ def update_stats(listbox, files_var, pages_var, size_var):
             total_pages += len(reader.pages)
             total_size_bytes += os.path.getsize(f)
             
-            # Verificar limite total de páginas
             if total_pages > MAX_TOTAL_PAGES:
                 raise SystemOverloadError(f"Limite de {MAX_TOTAL_PAGES} páginas excedido")
                 
         except Exception as e:
-            logging.warning(f"Erro ao ler {f} para estatísticas: {e}")
+            logging.warning(f"Erro ao ler {f}: {e}")
     
-    # Atualizar variáveis
-    files_var.set(f"Arquivos: {len(files)}")
-    pages_var.set(f"Páginas: {total_pages}")
+    files_var.set(f"{len(files)} arquivo{'s' if len(files) != 1 else ''}")
+    pages_var.set(f"{total_pages} página{'s' if total_pages != 1 else ''}")
     
-    # Converter tamanho para MB/KB
-    if total_size_bytes > 1024 * 1024:  # Mais de 1MB
+    if total_size_bytes > 1024 * 1024:
         size_mb = total_size_bytes / (1024 * 1024)
-        size_var.set(f"Tamanho: {size_mb:.1f} MB")
+        size_var.set(f"{size_mb:.1f} MB")
     else:
         size_kb = total_size_bytes / 1024
-        size_var.set(f"Tamanho: {size_kb:.1f} KB")
+        size_var.set(f"{size_kb:.1f} KB")
 
 def get_pdf_info(path):
-    """Retorna string com informações básicas do PDF para tooltip."""
-    
-    # 🔥 VERIFICAR CACHE PRIMEIRO
     if path in pdf_metadata_cache:
         return pdf_metadata_cache[path]
     try:
@@ -1591,18 +848,19 @@ def get_pdf_info(path):
         is_encrypted = reader.is_encrypted
         encryption_note = "\nProtegido com senha" if is_encrypted else ""
         
-        return (
+        info = (
             f"{os.path.basename(path)}\n"
             f"Páginas: {num_pages}\n"
             f"Título: {title}\n"
             f"Autor: {author}\n"
             f"Tamanho: {size_kb} KB{encryption_note}"
         )
+        pdf_metadata_cache[path] = info
+        return info
     except Exception as e:
         return f"{os.path.basename(path)}\n[Erro ao ler PDF: {e}]"
 
 def attach_dynamic_tooltips(listbox):
-    """Tooltips dinâmicos: troca imediatamente ao mudar de item."""
     tooltip = ToolTip(listbox, "")
     current_index = {"value": None}
 
@@ -1643,148 +901,118 @@ def attach_dynamic_tooltips(listbox):
     listbox.bind("<Leave>", on_leave)
     listbox.bind("<Button-1>", on_click)
 
-# -----------------------
-# Drag & Drop para reordenar
-# -----------------------
 def setup_drag_reorder(listbox):
-    """Configura arrastar e soltar para reordenar itens."""
-    drag_data = {"index": None, "item": None}
-    
     def on_drag_start(event):
         index = listbox.nearest(event.y)
         if index >= 0 and index < listbox.size():
-            drag_data["index"] = index
-            drag_data["item"] = listbox.get(index)
-            listbox.selection_clear(0, tk.END)
-            listbox.selection_set(index)
+            if not listbox.selection_includes(index):
+                listbox.selection_clear(0, tk.END)
+                listbox.selection_set(index)
+            listbox.config(cursor="hand2")
     
     def on_drag_motion(event):
         current_index = listbox.nearest(event.y)
         if current_index >= 0 and current_index < listbox.size():
-            listbox.selection_clear(0, tk.END)
-            listbox.selection_set(current_index)
+            if not listbox.selection_includes(current_index):
+                listbox.selection_set(current_index)
     
-    def on_drop(event):
-        if drag_data["item"] is None:
-            return
-        
-        drop_index = listbox.nearest(event.y)
-        if drop_index >= 0 and drop_index < listbox.size():
-            listbox.delete(drag_data["index"])
-            listbox.insert(drop_index, drag_data["item"])
-            listbox.selection_clear(0, tk.END)
-            listbox.selection_set(drop_index)
-            status_var.set("Item reordenado.")
-        
-        drag_data["index"] = None
-        drag_data["item"] = None
+    def on_drag_release(event):
+        listbox.config(cursor="")
     
     listbox.bind("<Button-1>", on_drag_start)
     listbox.bind("<B1-Motion>", on_drag_motion)
-    listbox.bind("<ButtonRelease-1>", on_drop)
+    listbox.bind("<ButtonRelease-1>", on_drag_release)
 
-# -----------------------
-# Movimento estável
-# -----------------------
+def highlight_move(listbox, indices):
+    for i in indices:
+        listbox.itemconfig(i, {'bg': '#e3f2fd'})
+    listbox.after(300, lambda: reset_highlight(listbox))
+
+def reset_highlight(listbox):
+    for i in range(listbox.size()):
+        listbox.itemconfig(i, {'bg': 'white'})
+
 def move_up(listbox, event=None):
-    """Move todos os itens selecionados uma posição para cima."""
     listbox.focus_set()
-    sel = list(listbox.curselection())
-    if not sel:
+    selected = list(listbox.curselection())
+    if not selected:
+        show_toast("Nenhum item selecionado", 1500)
         return
-    for i, idx in enumerate(sel):
+    
+    if 0 in selected:
+        show_toast("Itens no topo não podem subir", 1500)
+        return
+    
+    selected.sort()
+    
+    moved_count = 0
+    new_selection = []
+    
+    for idx in selected:
         if idx == 0:
             continue
+            
         text = listbox.get(idx)
         listbox.delete(idx)
-        listbox.insert(idx - 1, text)
-        sel[i] = idx - 1
+        new_idx = idx - 1
+        listbox.insert(new_idx, text)
+        new_selection.append(new_idx)
+        moved_count += 1
+    
     listbox.selection_clear(0, tk.END)
-    for idx in sel:
+    for idx in new_selection:
         listbox.selection_set(idx)
-    status_var.set("Ordem alterada.")
+    
+    if moved_count > 0:
+        highlight_move(listbox, new_selection)
+        status_var.set(f"{moved_count} item(ns) movido(s) para cima")
+        show_toast(f"↑ {moved_count} item(ns) movidos", 1000)
 
 def move_down(listbox, event=None):
-    """Move todos os itens selecionados uma posição para baixo."""
     listbox.focus_set()
-    sel = list(listbox.curselection())
-    if not sel:
+    selected = list(listbox.curselection())
+    if not selected:
+        show_toast("Nenhum item selecionado", 1500)
         return
+    
     size = listbox.size()
-    for i in range(len(sel) - 1, -1, -1):
-        idx = sel[i]
+    
+    if (size - 1) in selected:
+        show_toast("Itens no final não podem descer", 1500)
+        return
+    
+    selected.sort(reverse=True)
+    
+    moved_count = 0
+    new_selection = []
+    
+    for idx in selected:
         if idx == size - 1:
             continue
+            
         text = listbox.get(idx)
         listbox.delete(idx)
-        listbox.insert(idx + 1, text)
-        sel[i] = idx + 1
+        new_idx = idx + 1
+        listbox.insert(new_idx, text)
+        new_selection.append(new_idx)
+        moved_count += 1
+    
+    new_selection.sort()
+    
     listbox.selection_clear(0, tk.END)
-    for idx in sel:
+    for idx in new_selection:
         listbox.selection_set(idx)
-    status_var.set("Ordem alterada.")
+    
+    if moved_count > 0:
+        highlight_move(listbox, new_selection)
+        status_var.set(f"{moved_count} item(ns) movido(s) para baixo")
+        show_toast(f"↓ {moved_count} item(ns) movidos", 1000)
 
-# -----------------------
-# 🚨 CORREÇÃO: MENU DE CONTEXTO COM BOTÃO DIREITO
-# -----------------------
-def setup_context_menu(listbox, files_var, pages_var, size_var):
-    """Configura menu de contexto com botão direito para a listbox"""
-    context_menu = tk.Menu(listbox, tearoff=0)
-    
-    def show_context_menu(event):
-        # Seleciona o item sob o cursor
-        index = listbox.nearest(event.y)
-        if 0 <= index < listbox.size():
-            listbox.selection_clear(0, tk.END)
-            listbox.selection_set(index)
-            listbox.activate(index)
-        
-        # Mostra o menu no local do clique
-        try:
-            context_menu.tk_popup(event.x_root, event.y_root)
-        finally:
-            context_menu.grab_release()
-    
-    def remove_selected_context():
-        remove_selected(listbox, files_var, pages_var, size_var)
-    
-    def open_selected_context():
-        selection = listbox.curselection()
-        if selection:
-            file_path = listbox.get(selection[0])
-            open_pdf(listbox, tk.Event())
-    
-    def show_file_info():
-        selection = listbox.curselection()
-        if selection:
-            file_path = listbox.get(selection[0])
-            info = get_pdf_info(file_path)
-            messagebox.showinfo("Informações do PDF", info)
-    
-    def clear_all_context():
-        clear_list(listbox, files_var, pages_var, size_var)
-    
-    # Adiciona itens ao menu
-    context_menu.add_command(label="Abrir PDF", command=open_selected_context)
-    context_menu.add_command(label="Informações", command=show_file_info)
-    context_menu.add_separator()
-    context_menu.add_command(label="Remover Selecionado(s)", command=remove_selected_context)
-    context_menu.add_command(label="Limpar Lista", command=clear_all_context)
-    
-    # Vincula o menu de contexto ao botão direito
-    listbox.bind("<Button-3>", show_context_menu)  # Button-3 = botão direito
-    
-    return context_menu
-
-# -----------------------
-# Funções comuns
-# -----------------------
 def add_files(listbox, files_var, pages_var, size_var, event=None):
     files = filedialog.askopenfilenames(filetypes=[("Arquivos PDF", "*.pdf")])
     added = 0
     invalid = []
     
-    # Verificar limite de arquivos
     current_count = listbox.size()
     if current_count + len(files) > MAX_FILES_PER_OPERATION:
         messagebox.showwarning(
@@ -1816,18 +1044,18 @@ def add_files(listbox, files_var, pages_var, size_var, event=None):
     if added > 0:
         status_var.set(f"{added} arquivo(s) adicionados.")
         show_toast(f"{added} arquivo(s) adicionados.")
-        update_stats_debounced(listbox, files_var, pages_var, size_var)
-    
-    # CORREÇÃO: Atualizar estado dos botões após adicionar arquivos
-    enable_submit_on_conditions()
+        update_stats(listbox, files_var, pages_var, size_var)
+        
+        if listbox.size() > 0:
+            for widget in listbox.master.master.winfo_children():
+                if isinstance(widget, ttk.Label) and "arraste" in widget.cget("text").lower():
+                    widget.config(text="Arquivos PDF")
 
 def remove_selected(listbox, files_var, pages_var, size_var, event=None):
-    """🔒 CORREÇÃO 5: MULTI-SELECÇÃO FUNCIONAL - AGORA CORRIGIDA"""
     selected = list(listbox.curselection())
     if not selected:
         return
     
-    # 🔥 CORREÇÃO CRÍTICA: Ordena em ordem DECRESCENTE para evitar problemas de índice
     selected.sort(reverse=True)
     
     removed_files = []
@@ -1839,10 +1067,12 @@ def remove_selected(listbox, files_var, pages_var, size_var, event=None):
     
     status_var.set(f"{len(removed_files)} arquivo(s) removido(s).")
     show_toast(f"{len(removed_files)} arquivo(s) removido(s).")
-    update_stats_debounced(listbox, files_var, pages_var, size_var)
+    update_stats(listbox, files_var, pages_var, size_var)
     
-    # CORREÇÃO: Atualizar estado dos botões após remover arquivos
-    enable_submit_on_conditions()
+    if listbox.size() == 0:
+        for widget in listbox.master.master.winfo_children():
+            if isinstance(widget, ttk.Label) and "arquivos" in widget.cget("text").lower():
+                widget.config(text="Arquivos PDF (arraste para reordenar)")
 
 def clear_list(listbox, files_var, pages_var, size_var, event=None):
     if listbox.size() == 0:
@@ -1850,10 +1080,11 @@ def clear_list(listbox, files_var, pages_var, size_var, event=None):
     listbox.delete(0, tk.END)
     status_var.set("Lista limpa.")
     show_toast("Lista limpa.")
-    update_stats_debounced(listbox, files_var, pages_var, size_var)
+    update_stats(listbox, files_var, pages_var, size_var)
     
-    # CORREÇÃO: Atualizar estado dos botões após limpar lista
-    enable_submit_on_conditions()
+    for widget in listbox.master.master.winfo_children():
+        if isinstance(widget, ttk.Label) and "arquivos" in widget.cget("text").lower():
+            widget.config(text="Arquivos PDF (arraste para reordenar)")
 
 def sort_az(listbox, files_var, pages_var, size_var, event=None):
     files = list(listbox.get(0, tk.END))
@@ -1865,10 +1096,7 @@ def sort_az(listbox, files_var, pages_var, size_var, event=None):
         listbox.insert(tk.END, f)
     status_var.set("Arquivos ordenados A→Z.")
     show_toast("Ordenado alfabeticamente.")
-    update_stats_debounced(listbox, files_var, pages_var, size_var)
-    
-    # CORREÇÃO: Atualizar estado dos botões após ordenar
-    enable_submit_on_conditions()
+    update_stats(listbox, files_var, pages_var, size_var)
 
 def choose_output_folder(entry):
     folder = filedialog.askdirectory()
@@ -1884,7 +1112,7 @@ def generate_unique_filename(folder, base_name):
     while os.path.exists(os.path.join(folder, new_name)):
         new_name = f"{name}({counter}){ext}"
         counter += 1
-        if counter > 1000:  # Limite de segurança
+        if counter > 1000:
             timestamp = int(time.time())
             new_name = f"{name}_{timestamp}{ext}"
             break
@@ -1911,11 +1139,7 @@ def get_default_output_name(operation_type, files, options=None, page_ranges=Non
     else:
         return f"{base_name}_processado_{timestamp}.pdf"
 
-# -----------------------
-# Parse intervalos de páginas SEGURO
-# -----------------------
 def parse_page_ranges(ranges_str, max_pages):
-    """Converte "1-3,5,10-15" em [1,2,3,5,10,11,12,13,14,15] COM VALIDAÇÃO"""
     if not ranges_str.strip():
         return []
 
@@ -1928,7 +1152,6 @@ def parse_page_ranges(ranges_str, max_pages):
                 start, end = part.split("-", 1)
                 start_i, end_i = int(start), int(end)
                 
-                # VALIDAÇÃO CRÍTICA: prevenir números negativos e fora do range
                 if start_i < 1 or end_i < 1:
                     raise ValueError("Números de página devem ser positivos")
                 if start_i > max_pages or end_i > max_pages:
@@ -1940,17 +1163,14 @@ def parse_page_ranges(ranges_str, max_pages):
                     pages.update(range(end_i, start_i + 1))
             else:
                 page_num = int(part)
-                # VALIDAÇÃO CRÍTICA
                 if page_num < 1:
                     raise ValueError("Números de página devem ser positivos")
                 if page_num > max_pages:
                     raise ValueError(f"Números de página devem ser <= {max_pages}")
                 pages.add(page_num)
 
-        # Remover duplicatas e ordenar
         pages = sorted(list(pages))
         
-        # Verificar limite de páginas
         if len(pages) > MAX_TOTAL_PAGES:
             raise SystemOverloadError(f"Limite de {MAX_TOTAL_PAGES} páginas excedido")
             
@@ -1961,29 +1181,51 @@ def parse_page_ranges(ranges_str, max_pages):
         else:
             raise
 
-# -----------------------
-# UI State Management - AGORA COM SEGURANÇA
-# -----------------------
+def reset_ui_state():
+    try:
+        logging.info("Restaurando estado da UI...")
+        
+        set_ui_state(True)
+        
+        toggle_password_entry()
+        
+        if 'progress_merge' in globals():
+            safe_widget_config(progress_merge, value=0)
+            safe_widget_config(progress_merge, mode="determinate")
+        
+        if 'progress_split' in globals():
+            safe_widget_config(progress_split, value=0)
+            safe_widget_config(progress_split, mode="determinate")
+        
+        safe_widget_config(root, cursor="")
+        
+        if 'btn_cancel_merge' in globals():
+            try:
+                btn_cancel_merge.pack_forget()
+            except tk.TclError:
+                pass
+        
+        if 'btn_cancel_split' in globals():
+            try:
+                btn_cancel_split.pack_forget()
+            except tk.TclError:
+                pass
+        
+        show_status("Pronto", "info")
+        
+        root.update_idletasks()
+        
+        logging.info("Estado da UI restaurado com sucesso")
+        
+    except Exception as e:
+        logging.error(f"Erro ao restaurar estado da UI: {e}")
+
 def set_ui_state(enabled):
-    """Habilita ou desabilita elementos da UI durante processamento - COM VERIFICAÇÕES SEGURAS"""
     state = "normal" if enabled else "disabled"
     
-    # Usar safe_widget_config para todos os widgets
     safe_widget_config(btn_merge, state=state)
     safe_widget_config(btn_split, state=state)
     
-    # Verificar frames de botões
-    if 'btn_frame_merge' in globals():
-        for widget in btn_frame_merge.winfo_children():
-            if isinstance(widget, ttk.Button):
-                safe_widget_config(widget, state=state)
-    
-    if 'btn_frame_split' in globals():
-        for widget in btn_frame_split.winfo_children():
-            if isinstance(widget, ttk.Button):
-                safe_widget_config(widget, state=state)
-    
-    # Esconde botões de cancelamento se existirem
     if enabled:
         if 'btn_cancel_merge' in globals():
             try:
@@ -1997,225 +1239,20 @@ def set_ui_state(enabled):
                 pass
         
         safe_widget_config(root, cursor="")
+        
+        if 'progress_merge' in globals():
+            safe_widget_config(progress_merge, value=0)
+        if 'progress_split' in globals():
+            safe_widget_config(progress_split, value=0)
     else:
-        safe_widget_config(root, cursor="watch")
-
-def validate_pdfa_protection_compatibility():
-    """
-    Valida e ajusta automaticamente o conflito entre PDF/A e proteção por senha.
-    Regra: PDF/A e proteção por senha são MUTUAMENTE EXCLUSIVOS.
-    """
-    protect_on = protect_var.get()
-    pdfa_on = pdfa_var.get()
-    
-    # Se ambos estão ativos, resolva o conflito
-    if protect_on and pdfa_on:
-        # Prioridade: mantém a última opção que o usuário ativou
-        # Se o usuário acabou de marcar proteção, desliga PDF/A
-        # Se o usuário acabou de marcar PDF/A, desliga proteção
+        safe_widget_config(root, cursor="wait")
         
-        # Para simplificar: sempre desativa o PDF/A quando há conflito
-        # (mais seguro para documentos institucionais)
-        pdfa_var.set(False)
-        
-        # Mostra explicação educativa
-        show_message_in_main_thread(
-            "Incompatibilidade Detectada",
-            "PDF/A e proteção por senha são incompatíveis.\n\n"
-            "• PDF/A é um formato de arquivamento de longo prazo\n"
-            "• Proteção por senha impede a verificação de conformidade\n\n"
-            "Solução: Use apenas uma das opções por vez.\n"
-            "Para documentos institucionais, recomendamos PDF/A.",
-            "warning"
-        )
-        
-        # Atualiza o texto informativo
-        if widget_exists(pdfa_info_label):
-            safe_widget_config(pdfa_info_label, 
-                             text="PDF/A desativado - Conflito com proteção por senha",
-                             foreground="orange")
-    
-    # Atualiza estados dos widgets
-    update_protection_pdfa_states()
-
-def update_protection_pdfa_states():
-    """Atualiza estados dos widgets baseado nas seleções atuais"""
-    protect_on = protect_var.get()
-    pdfa_on = pdfa_var.get()
-    
-    # Campo de senha só fica habilitado se proteção estiver ATIVA e PDF/A INATIVO
-    password_state = "normal" if protect_on and not pdfa_on else "disabled"
-    safe_widget_config(password_entry, state=password_state)
-    
-    # Atualiza textos informativos
-    if widget_exists(pdfa_info_label):
-        if pdfa_on:
-            safe_widget_config(pdfa_info_label, 
-                             text="Formato PDF/A-2B recomendado para SEI (sem proteção por senha)",
-                             foreground="darkgreen")
-        elif protect_on:
-            safe_widget_config(pdfa_info_label, 
-                             text="PDF/A indisponível com proteção por senha ativa",
-                             foreground="orange")
-        else:
-            safe_widget_config(pdfa_info_label, 
-                             text="Formato PDF/A-2B recomendado para o Sistema Eletrônico de Informações (SEI)",
-                             foreground="darkgreen")
-
-# -----------------------
-# VALIDAÇÃO DE SENHA
-# -----------------------
-def focus_password_entry(*_):
-    """Foca automaticamente no campo de senha quando a proteção é ativada"""
-    if protect_var.get():
-        safe_widget_config(password_entry, state="normal")
-        password_entry.focus_set()
-        password_entry.select_range(0, tk.END)
-
-def validate_page_ranges_on_type(event=None):
-    """Validação em tempo real dos intervalos de páginas"""
-    widget = event.widget if event else split_pages_entry
-    text = widget.get()
-    
-    # Remove cores anteriores
-    safe_widget_config(widget, foreground="black")
-    
-    if not text.strip():
-        return True
-        
-    try:
-        # Simula o parse para validação
-        if split_all_var.get():
-            return True
-            
-        # Validação básica - apenas verifica se é número ou intervalo
-        for part in text.replace(" ", "").split(","):
-            if part and "-" in part:
-                start, end = part.split("-", 1)
-                int(start)
-                int(end)
-            elif part:
-                int(part)
-                
-        return True
-    except ValueError:
-        # Destaca em vermelho se inválido
-        safe_widget_config(widget, foreground="red")
-        return False
-
-def auto_expand_page_ranges(text):
-    """Expande automaticamente intervalos simples como '1-3' para '1,2,3'"""
-    if "-" in text and "," not in text and len(text) < 10:
-        try:
-            start, end = text.split("-")
-            start_i, end_i = int(start), int(end)
-            if 1 <= start_i < end_i <= 100:  # Limite razoável
-                expanded = ",".join(str(i) for i in range(start_i, end_i + 1))
-                return expanded
-        except ValueError:
-            pass
-    return text
-
-def on_page_range_focusout(event):
-    """Ao sair do campo, tenta expandir intervalos automaticamente"""
-    if not split_all_var.get():
-        current_text = split_pages_entry.get()
-        expanded = auto_expand_page_ranges(current_text)
-        if expanded != current_text:
-            split_pages_entry.delete(0, tk.END)
-            split_pages_entry.insert(0, expanded)
-            show_toast("Intervalo expandido automaticamente", 1500)
-
-def enable_submit_on_conditions():
-    """Habilita/desabilita botões baseado em condições mínimas"""
-    has_files_merge = merge_list.size() > 0
-    has_files_split = split_list.size() > 0
-    
-    # Para merge: precisa ter arquivos
-    safe_widget_config(btn_merge, state="normal" if has_files_merge else "disabled")
-    
-    # Para split: precisa ter arquivos E modo válido
-    if has_files_split:
-        mode = split_mode_var.get()
-        
-        # Validações por modo
-        valid = False
-        if mode == "extract":
-            valid = bool(split_pages_entry.get().strip())
-        elif mode == "all":
-            valid = True
-        elif mode == "interval":
-            try:
-                valid = int(split_interval_var.get()) > 0
-            except:
-                valid = False
-        elif mode == "parts":
-            try:
-                valid = int(split_parts_var.get()) > 0
-            except:
-                valid = False
-        
-        safe_widget_config(btn_split, state="normal" if valid else "disabled")
-    else:
-        safe_widget_config(btn_split, state="disabled")
-
-def setup_ux_enhancements():
-    """Configura todas as melhorias de UX"""
-    # Validação em tempo real para páginas
-    split_pages_entry.bind("<KeyRelease>", validate_page_ranges_on_type)
-    split_pages_entry.bind("<FocusOut>", on_page_range_focusout)
-    
-    # Atualização automática dos botões
-    for widget in [merge_list, split_list]:
-        widget.bind("<<ListboxSelect>>", lambda e: enable_submit_on_conditions())
-    
-    split_all_var.trace_add("write", lambda *_: enable_submit_on_conditions())
-    split_pages_entry.bind("<KeyRelease>", lambda e: enable_submit_on_conditions())
-    
-    # Enter para submeter nos campos
-    password_entry.bind("<Return>", lambda e: merge_pdfs())
-    split_pages_entry.bind("<Return>", lambda e: split_or_extract_pdfs())
-    
-    # Tooltip persistente para o campo de páginas
-    pages_tooltip = ToolTip(split_pages_entry, 
-        "Exemplos:\n• 1-5 (páginas 1 a 5)\n• 1,3,5 (páginas 1, 3 e 5)\n• 1-3,7,10-15 (combina intervalos)")
-    
-    def show_pages_tooltip(event):
-        pages_tooltip.schedule_show()
-    
-    def hide_pages_tooltip(event):
-        pages_tooltip.hide()
-    
-    split_pages_entry.bind("<Enter>", show_pages_tooltip)
-    split_pages_entry.bind("<Leave>", hide_pages_tooltip)
-
-def add_file_count_badge(listbox, badge_var):
-    """Adiciona contador de arquivos na aba"""
-    def update_badge():
-        count = listbox.size()
-        badge_var.set(f" ({count})" if count > 0 else "")
-    
-    listbox.bind("<<ListboxSelect>>", lambda e: update_badge())
-    return update_badge
-
-def focus_compress_combo(*_):
-    """Foca automaticamente no combo de compressão quando ativado"""
-    if compress_var.get():
-        safe_widget_config(compress_combo, state="normal")
-        compress_combo.focus_set()
-
-def validate_password_strength(password):
-    """Valida força básica da senha"""
-    if not password:
-        return False, "Senha não pode estar vazia"
-    
-    if len(password) < 4:
-        return False, "Senha muito curta (mínimo 4 caracteres)"
-    
-    return True, "Senha OK"
+        if 'btn_merge' in globals():
+            safe_widget_config(btn_merge, text="Processando...")
+        if 'btn_split' in globals():
+            safe_widget_config(btn_split, text="Processando...")
 
 def show_status(message, type="info"):
-    """Mostra status com cores diferentes - COM VERIFICAÇÃO DE SEGURANÇA"""
     try:
         colors = {
             "info": "blue",
@@ -2224,64 +1261,12 @@ def show_status(message, type="info"):
             "error": "red"
         }
         status_var.set(message)
-        # Verifica se status_label já foi criado
         if 'status_label' in globals():
             safe_widget_config(status_label, foreground=colors.get(type, "blue"))
     except Exception as e:
         logging.debug(f"Erro ao atualizar status: {e}")
 
-
-def check_dependencies():
-    """Verificação simplificada de dependências - CORREÇÃO: Função faltando"""
-    logging.info("✅ Dependências verificadas:")
-    logging.info(f"   - PyPDF2: {PDF_LIBS_AVAILABLE}")
-    logging.info(f"   - pikepdf: {PIKEPDF_AVAILABLE}")
-    logging.info(f"   - Ghostscript: {bool(GHOSTSCRIPT_PATH)}")
-    logging.info(f"   - PDF/A: {PDFA_AVAILABLE}")
-    logging.info(f"   - Drag & Drop: {DND_AVAILABLE}")
-
-def show_first_run_disclaimer():
-    """Mostra aviso inicial se necessário - CORREÇÃO: Função faltando"""
-    # Pode deixar vazio ou adicionar um aviso opcional
-    pass
-
-def offer_recovery_on_startup():
-    """Oferece recuperação de operação anterior - CORREÇÃO: Função faltando"""
-    # Pode deixar vazio - funcionalidade opcional
-    pass
-
-def create_operation_checkpoint(operation_type, files_processed, current_step, temp_files):
-    """Cria checkpoint para recuperação - CORREÇÃO: Função faltando"""
-    # Funcionalidade avançada - pode deixar como placeholder
-    pass
-
-def cleanup_checkpoint():
-    """Limpa checkpoint - CORREÇÃO: Função faltando"""
-    # Funcionalidade avançada - pode deixar como placeholder
-    pass
-
-def show_environment_check():
-    """Mostra verificação de ambiente - CORREÇÃO: Função faltando"""
-    try:
-        info = f"""Verificação do Ambiente JuntaPDF:
-
-PyPDF2: {'✅ Disponível' if PDF_LIBS_AVAILABLE else '❌ Não disponível'}
-pikepdf: {'✅ Disponível' if PIKEPDF_AVAILABLE else '❌ Não disponível'}
-Ghostscript: {'✅ ' + GHOSTSCRIPT_PATH if GHOSTSCRIPT_PATH else '❌ Não encontrado'}
-PDF/A: {'✅ Disponível' if PDFA_AVAILABLE else '❌ Indisponível'}
-Drag & Drop: {'✅ Disponível' if DND_AVAILABLE else '❌ Não disponível'}
-
-Python: {sys.version}
-Sistema: {sys.platform}"""
-        
-        messagebox.showinfo("Verificação de Ambiente", info)
-    except Exception as e:
-        messagebox.showerror("Erro", f"Erro ao verificar ambiente: {e}")
-# =============================================================================
-# 🚨 CORREÇÃO 4: MESSAGEBOX NA THREAD PRINCIPAL
-# =============================================================================
 def show_message_in_main_thread(title, message, type="info"):
-    """Exibe messagebox de forma segura na thread principal"""
     def show():
         if type == "error":
             messagebox.showerror(title, message)
@@ -2292,410 +1277,52 @@ def show_message_in_main_thread(title, message, type="info"):
     
     root.after(0, show)
 
-# =============================================================================
-# FUNÇÕES PRINCIPAIS DE PROCESSAMENTO - COM SEGURANÇA
-# =============================================================================
-
-# 🚨 CORREÇÃO 3: CRIPTOGRAFIA COMPATÍVEL ENTRE VERSÕES PyPDF2
 def aplicar_criptografia(writer, password):
-    """
-    Aplica criptografia COMPATÍVEL entre versões do PyPDF2
-    CORREÇÃO CRÍTICA: Método que realmente funciona
-    """
     if not password or len(password.strip()) == 0:
         raise ValueError("Senha não pode estar vazia")
     
     logging.info("Aplicando criptografia ao PDF...")
     
     try:
-        # 🔥 VERIFICAÇÃO DE SEGURANÇA: Garante que há páginas antes de criptografar
-        if not hasattr(writer, '_pages') or len(writer._pages) == 0:
-            raise PDFProcessingError("Não é possível criptografar PDF sem páginas")
-        
-        # ESTRATÉGIA PRINCIPAL: Método moderno do PyPDF2 com parâmetros explícitos
-        writer.encrypt(
-            user_password=password,
-            owner_password=password,
-            use_128bit=True
-        )
-        logging.info("✅ Criptografia aplicada com sucesso (método padrão)")
+        if hasattr(writer, '_encrypt'):
+            writer._encrypt(
+                user_password=password,
+                owner_password=password,
+                use_128bit=True
+            )
+        else:
+            writer.encrypt(
+                user_password=password,
+                owner_password=password,
+                use_128bit=True
+            )
+        logging.info("Criptografia aplicada com sucesso")
         return True
         
     except Exception as e:
-        logging.error(f"❌ Falha na criptografia (método 1): {e}")
+        logging.error(f"Falha na criptografia: {e}")
         
-        # ESTRATÉGIA ALTERNATIVA: Para versões específicas
         try:
-            # Tentar método alternativo para versões mais antigas
-            if hasattr(writer, '_encrypt'):
-                writer._encrypt(password, password, use_128bit=True)
-                logging.info("✅ Criptografia aplicada (método alternativo)")
-                return True
-            else:
-                # Última tentativa: encrypt sem parâmetros
-                writer.encrypt(password)
-                logging.info("✅ Criptografia aplicada (método simples)")
-                return True
-                
+            writer.encrypt(password)
+            logging.info("Criptografia aplicada (método simples de fallback)")
+            return True
         except Exception as e2:
-            logging.error(f"❌ Falha total na criptografia: {e2}")
+            logging.error(f"Falha total na criptografia: {e2}")
             raise PDFProcessingError(f"Falha na criptografia: {e2}")
 
-# -----------------------
-# Funções Juntar PDFs (com threading SEGURO)
-# -----------------------
-def merge_pdfs_thread():
-    global cancel_operation
-    cancel_operation = False
-
-    files = merge_list.get(0, tk.END)
-    if not files:
-        show_message_in_main_thread("Erro", "Nenhum arquivo PDF selecionado.", "error")
-        return
-
-    # 🔥 LOG DE AUDITORIA - INÍCIO
-    password = password_entry.get().strip()
-    log_audit_event("merge_start", files, options={
-        'pdfa': pdfa_var.get(),
-        'protected': protect_var.get() and bool(password),
-        'compress': compress_var.get(),
-        'remove_metadata': meta_var.get(),
-        'file_count': len(files)
-    })
-    
-    # 🔥 VALIDAÇÃO CONFLITO PDF/A vs PROTEÇÃO
-    if pdfa_var.get() and protect_var.get() and password:
-        choice = messagebox.askyesno(
-            "Conflito de Opções", 
-            "PDF/A e proteção por senha são INCOMPATÍVEIS.\n\n"
-            "• PDF/A: padrão de arquivamento (recomendado para documentos oficiais)\n"
-            "• Proteção: segurança com senha\n\n"
-            "Deseja priorizar o PDF/A e REMOVER a proteção?",
-            icon='warning'
-        )
-        if choice:
-            protect_var.set(False)
-            password_entry.delete(0, tk.END)
-            password = ""
-            show_status("PDF/A selecionado - proteção desativada", "warning")
-        else:
-            pdfa_var.set(False)
-            show_status("Proteção mantida - PDF/A desativado", "warning")
-
-    # VALIDAÇÃO DE LIMITES
-    if len(files) > MAX_FILES_PER_OPERATION:
-        show_message_in_main_thread("Erro", f"Máximo de {MAX_FILES_PER_OPERATION} arquivos por operação.", "error")
-        return
-
-    folder = merge_output_entry.get() or os.path.dirname(files[0])
-    
-    try:
-        os.makedirs(folder, exist_ok=True)
-    except Exception as e:
-        show_message_in_main_thread("Erro", f"Não foi possível criar diretório:\n{folder}\n\nErro: {e}", "error")
-        return
-
-    # Validação de senha
-    password = password_entry.get().strip()
-    if protect_var.get() and password:
-        is_valid, msg = validate_password_strength(password)
-        if not is_valid:
-            show_message_in_main_thread("Senha Fraca", f"{msg}\n\nDeseja continuar mesmo assim?", "warning")
-    
-    custom_name = merge_filename_entry.get().strip()
-    if custom_name and custom_name != "Deixe vazio para nome automático":
-        output_name = custom_name
-        if not output_name.lower().endswith(".pdf"):
-            output_name += ".pdf"
-    else:
-        output_name = get_default_output_name(
-            "merge", 
-            files,
-            options={
-                'compress': compress_var.get(),
-                'pdfa': pdfa_var.get(),
-                'protected': protect_var.get() and bool(password)
-            }
-        )
-    
-    output_path = generate_unique_filename(folder, output_name)
-    remove_meta = meta_var.get()
-    convert_pdfa = pdfa_var.get()
-
-    # CALCULAR PROGRESSO REAL
-    total_steps = len(files) + 3
-    current_step = 0
-    
-    progress_widget = None
-    if 'progress_merge' in globals():
-        progress_widget = progress_merge
-        safe_widget_config(progress_widget, maximum=total_steps)
-        safe_widget_config(progress_widget, value=current_step)
-
-    temp_files_to_cleanup = []
-
-    try:
-        # CRIAR CHECKPOINT
-        create_operation_checkpoint("merge", [], current_step, temp_files_to_cleanup)
-        
-        logging.info(f"Iniciando união de {len(files)} arquivos -> {output_path}")
-        
-        # FASE 1: Unir PDFs - COM BATCH PROCESSING
-        merger = PdfMerger()
-        
-        # 🔥 PROCESSAMENTO EM LOTES
-        for batch_num, batch in enumerate(process_in_batches(files, batch_size=5)):
-            if cancel_operation:
-                status_var.set("Operação cancelada.")
-                logging.info("Operação cancelada pelo usuário")
-                return
-            
-            show_status(f"Processando lote {batch_num + 1}...", "info")
-            
-            for idx, f in enumerate(batch):
-                if cancel_operation:
-                    return
-                    
-                # VALIDAÇÃO DE SEGURANÇA
-                try:
-                    validate_file_security(f)
-                except SecurityError as e:
-                    logging.error(f"Arquivo rejeitado: {f} - {e}")
-                    show_message_in_main_thread("Erro de Segurança", f"Arquivo rejeitado:\n{os.path.basename(f)}\n\nMotivo: {e}", "error")
-                    return
-                
-                merger.append(f)
-                current_step += 1
-                if progress_widget:
-                    safe_widget_config(progress_widget, value=current_step)
-                
-                create_operation_checkpoint("merge", files[:idx+1], current_step, temp_files_to_cleanup)
-                show_status(f"Unindo {idx + 1}/{len(files)}: {os.path.basename(f)}", "info")
-                root.update_idletasks()
-
-        # 🔥 ARQUIVO TEMPORÁRIO SEGURO
-        temp_output = safe_temp_file(prefix="merge", suffix=".pdf")
-        temp_files_to_cleanup.append(temp_output)
-        
-        with open(temp_output, "wb") as f_out:
-            merger.write(f_out)
-        merger.close()
-        
-        current_step += 1
-        if progress_widget:
-            safe_widget_config(progress_widget, value=current_step)
-        show_status("Salvando arquivo unido...", "info")
-        root.update_idletasks()
-        
-        current_temp = temp_output
-
-        # FASE 2: Proteção e metadados
-        if (not pdfa_var.get()) and protect_var.get() and password:
-            current_step += 1
-            if progress_widget:
-                safe_widget_config(progress_widget, value=current_step)
-            status_var.set("Aplicando proteção...")
-            root.update_idletasks()
-            
-            try:
-                reader = PdfReader(current_temp)
-                writer = PdfWriter()
-                
-                for page in reader.pages:
-                    writer.add_page(page)
-                
-                if protect_var.get() and password:
-                    aplicar_criptografia(writer, password)
-                
-                if remove_meta:
-                    writer.add_metadata({})
-                elif reader.metadata:
-                    writer.add_metadata(reader.metadata)
-                
-                temp_protected = safe_temp_file(prefix="protected", suffix=".pdf")
-                temp_files_to_cleanup.append(temp_protected)
-                
-                with open(temp_protected, "wb") as f_out:
-                    writer.write(f_out)
-                    
-                if current_temp in temp_files_to_cleanup:
-                    temp_files_to_cleanup.remove(current_temp)
-                remove_temp_file(current_temp)
-                try:
-                    os.remove(current_temp)
-                except:
-                    pass
-                    
-                current_temp = temp_protected
-                
-            except Exception as e:
-                logging.warning(f"Falha na proteção: {e}")
-                show_message_in_main_thread("Aviso", f"Proteção falhou: {e}\n\nContinuando sem proteção.", "warning")
-
-        # FASE 3: Compressão
-        if compress_var.get() and GHOSTSCRIPT_PATH:
-            try:
-                current_step += 1
-                if progress_widget:
-                    safe_widget_config(progress_widget, value=current_step)
-                
-                show_status("Comprimindo PDF...", "info")
-                root.update_idletasks()
-                
-                temp_comprimido = safe_temp_file(prefix="compressed", suffix=".pdf")
-                temp_files_to_cleanup.append(temp_comprimido)
-                
-                nivel_compressao = compress_level.get()
-                reducao = comprimir_com_ghostscript(current_temp, temp_comprimido, nivel_compressao)
-                
-                if os.path.exists(temp_comprimido) and os.path.getsize(temp_comprimido) > 0:
-                    if current_temp in temp_files_to_cleanup:
-                        temp_files_to_cleanup.remove(current_temp)
-                    remove_temp_file(current_temp)
-                    try:
-                        os.remove(current_temp)
-                    except:
-                        pass
-                    
-                    current_temp = temp_comprimido
-                    show_status(f"PDF comprimido: redução de {reducao:.1f}%", "success")
-                else:
-                    logging.warning("Arquivo comprimido inválido, mantendo original")
-                    show_message_in_main_thread("Aviso", "Compressão falhou - mantendo PDF original", "warning")
-                    
-            except Exception as e:
-                logging.warning(f"Falha na compressão: {e}")
-                show_message_in_main_thread("Aviso", f"Compressão falhou: {e}\n\nContinuando com PDF não comprimido.", "warning")
-
-        # CONCLUSÃO
-        os.replace(current_temp, output_path)
-        
-        show_status("Validando integridade do PDF...", "info")
-        root.update_idletasks()
-        
-        is_valid, validation_msg = validate_output_pdf(output_path)
-        if not is_valid:
-            logging.error(f"PDF de saída inválido: {validation_msg}")
-            
-            fallback_success = False
-            if os.path.exists(current_temp):
-                try:
-                    logging.info("Tentando fallback para arquivo temporário original...")
-                    os.replace(current_temp, output_path)
-                    is_valid, validation_msg = validate_output_pdf(output_path)
-                    if is_valid:
-                        fallback_success = True
-                        logging.info("Fallback bem-sucedido!")
-                except Exception as fallback_error:
-                    logging.error(f"Falha no fallback: {fallback_error}")
-            
-            if not fallback_success:
-                try:
-                    if os.path.exists(output_path):
-                        os.remove(output_path)
-                except:
-                    pass
-                raise PDFProcessingError(f"Falha na validação do PDF de saída: {validation_msg}")
-        
-        # 🔥 LOG DE AUDITORIA - SUCESSO
-        tamanho_final = os.path.getsize(output_path) / 1024 / 1024
-        log_audit_event("merge_success", files, options={
-            'output_path': output_path,
-            'final_size_mb': round(tamanho_final, 2),
-            'compression_applied': compress_var.get(),
-            'pdfa_applied': pdfa_var.get(),
-            'protection_applied': protect_var.get() and bool(password)
-        })
-        
-        show_status(f"PDF criado e validado: {output_path} ({tamanho_final:.1f} MB)", "success")
-        logging.info(f"PDF unido criado e validado: {output_path} ({tamanho_final:.1f} MB) - {validation_msg}")
-        
-        def show_success_dialog():
-            result = messagebox.askyesno(
-                "Sucesso", 
-                f"PDF salvo em:\n{output_path}\nTamanho: {tamanho_final:.1f} MB\n\nDeseja abrir a pasta de saída?",
-                icon='info'
-            )
-            if result:
-                abrir_pasta_output(folder)
-        
-        root.after(0, show_success_dialog)
-
-    except Exception as e:
-        # 🔥 LOG DE AUDITORIA - ERRO
-        log_audit_event("merge_error", files, options={
-            'error': str(e),
-            'error_type': type(e).__name__
-        })
-        
-        logging.error(f"Falha ao unir PDFs: {e}")
-        show_message_in_main_thread("Erro", f"Falha ao unir PDFs:\n{e}", "error")
-        status_var.set("Erro ao unir arquivos.")
-    finally:
-        # LIMPEZA
-        for temp_file in temp_files_to_cleanup:
-            try:
-                if os.path.exists(temp_file):
-                    os.remove(temp_file)
-                    remove_temp_file(temp_file)
-            except Exception as e:
-                logging.warning(f"Erro ao limpar {temp_file}: {e}")
-        
-        cleanup_checkpoint()
-        set_ui_state(True)
-        if progress_widget:
-            safe_widget_config(progress_widget, value=0)
-
-def merge_pdfs(event=None):
-    if merge_list.size() == 0:
-        show_message_in_main_thread("Aviso", "Nenhum arquivo adicionado.", "warning")
-        return
-    
-    # VERIFICAR LIMITES ANTES DE INICIAR
-    try:
-        total_pages = 0
-        for f in merge_list.get(0, tk.END):
-            reader = safe_pdf_reader(f)
-            total_pages += len(reader.pages)
-            if total_pages > MAX_TOTAL_PAGES:
-                raise SystemOverloadError(f"Limite de {MAX_TOTAL_PAGES} páginas excedido")
-    except SystemOverloadError as e:
-        show_message_in_main_thread("Limite Excedido", str(e), "error")
-        return
-    except Exception as e:
-        logging.warning(f"Erro ao verificar limites: {e}")
-    
-    set_ui_state(False)
-    if 'btn_cancel_merge' in globals():
-        try:
-            btn_cancel_merge.pack(pady=5)
-        except tk.TclError:
-            pass
-    submit_thread_task(merge_pdfs_thread)
-
-def cancel_merge():
-    global cancel_operation
-    cancel_operation = True
-    logging.info("Cancelamento solicitado pelo usuário")
-    
 def log_audit_event(operation, files, user=None, options=None):
-    """
-    Registro de auditoria para compliance institucional
-    operation: "merge_start", "merge_success", "merge_error", "split_start", etc.
-    """
     try:
         audit_log = {
             'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
             'operation': operation,
             'files_count': len(files),
-            'file_names': [os.path.basename(f) for f in files],  # Apenas nomes, não paths completos
+            'file_names': [os.path.basename(f) for f in files],
             'options': options or {},
             'user': user or os.getlogin(),
             'session_id': f"{os.getpid()}_{int(time.time())}",
             'version': 'JuntaPDF 2.0'
         }
         
-        # Salvar em arquivo separado de auditoria (não no log normal)
         audit_dir = os.path.join(tempfile.gettempdir(), "JuntaPDF_Audit")
         os.makedirs(audit_dir, exist_ok=True)
         
@@ -2708,292 +1335,111 @@ def log_audit_event(operation, files, user=None, options=None):
         
     except Exception as e:
         logging.warning(f"Erro ao registrar auditoria: {e}")
-        # Não falhar a operação principal por causa do log de auditoria
 
-# -----------------------
-# Funções Dividir/Extrair PDFs (com threading SEGURO)
-# -----------------------
-def split_or_extract_pdfs_thread():
-    global cancel_operation
-    cancel_operation = False
+def setup_context_menu(listbox, files_var, pages_var, size_var):
+    context_menu = tk.Menu(listbox, tearoff=0)
     
-    files = split_list.get(0, tk.END)
-    if not files:
-        show_message_in_main_thread("Erro", "Nenhum arquivo PDF selecionado.", "error")
-        return
-
-    # VALIDAÇÃO DE LIMITES
-    if len(files) > MAX_FILES_PER_OPERATION:
-        show_message_in_main_thread("Erro", f"Máximo de {MAX_FILES_PER_OPERATION} arquivos por operação.", "error")
-        return
-
-    folder = split_output_entry.get() or os.path.dirname(files[0])
+    def remove_selected_context():
+        remove_selected(listbox, files_var, pages_var, size_var)
     
-    # 🔥 CORREÇÃO: CRIA DIRETÓRIO SE NÃO EXISTIR
-    try:
-        os.makedirs(folder, exist_ok=True)
-    except Exception as e:
-        show_message_in_main_thread("Erro", f"Não foi possível criar diretório:\n{folder}\n\nErro: {e}", "error")
-        return
-
-    # DETECTAR MODO DE DIVISÃO
-    split_mode = split_mode_var.get()
-    
-    # VALIDAÇÕES POR MODO
-    if split_mode == "extract":
-        page_ranges_input = split_pages_entry.get().strip()
-        if not page_ranges_input:
-            show_message_in_main_thread("Erro", "Especifique os intervalos de páginas.", "error")
-            return
-    
-    elif split_mode == "interval":
+    def open_selected_context():
         try:
-            interval = int(split_interval_var.get())
-            if interval < 1:
-                raise ValueError
-        except ValueError:
-            show_message_in_main_thread("Erro", "Intervalo deve ser um número inteiro maior que 0.", "error")
-            return
+            index = listbox.index(tk.ACTIVE)
+            if index >= 0:
+                current_selection = listbox.curselection()
+                listbox.selection_clear(0, tk.END)
+                listbox.selection_set(index)
+                open_pdf(listbox, tk.Event())
+                listbox.selection_clear(0, tk.END)
+                for i in current_selection:
+                    listbox.selection_set(i)
+        except Exception as e:
+            logging.warning(f"Erro no menu de contexto: {e}")
     
-    elif split_mode == "parts":
+    def show_file_info():
         try:
-            parts = int(split_parts_var.get())
-            if parts < 1:
-                raise ValueError
-        except ValueError:
-            show_message_in_main_thread("Erro", "Número de partes deve ser um inteiro maior que 0.", "error")
-            return
+            index = listbox.index(tk.ACTIVE)
+            if index >= 0:
+                file_path = listbox.get(index)
+                info = get_pdf_info(file_path)
+                messagebox.showinfo("Informações do PDF", info)
+        except Exception as e:
+            logging.warning(f"Erro no menu de contexto: {e}")
+    
+    def clear_all_context():
+        clear_list(listbox, files_var, pages_var, size_var)
+    
+    def adicionar_arquivos_context():
+        add_files(listbox, files_var, pages_var, size_var)
 
-    convert_pdfa = pdfa_var_split.get()
-
-    try:
-        # CALCULAR TOTAL DE ETAPAS
-        total_pages_to_process = 0
-        for f in files:
-            try:
-                total_pages_to_process += len(safe_pdf_reader(f).pages)
-            except:
-                pass
-
-        # VERIFICAR LIMITE TOTAL
-        if total_pages_to_process > MAX_TOTAL_PAGES:
-            raise SystemOverloadError(f"Limite de {MAX_TOTAL_PAGES} páginas excedido")
-
-        extra_steps = 2 if pdfa_var_split.get() and PDFA_AVAILABLE else 1
-        total_steps = total_pages_to_process + extra_steps
+    context_menu.add_command(label="Adicionar Arquivos (Ctrl+O)", command=adicionar_arquivos_context)
+    context_menu.add_command(label="Abrir PDF", command=open_selected_context)
+    context_menu.add_command(label="Informações", command=show_file_info)
+    context_menu.add_separator()
+    context_menu.add_command(label="Remover (Del)", command=remove_selected_context)
+    context_menu.add_command(label="Limpar Lista (Ctrl+L)", command=clear_all_context)
+    
+    def show_context_menu(event):
+        index = listbox.nearest(event.y)
         
-        # Usar safe_widget_config para progressbar
-        progress_widget = None
-        if 'progress_split' in globals():
-            progress_widget = progress_split
-            safe_widget_config(progress_widget, maximum=max(1, total_steps))
-            safe_widget_config(progress_widget, value=0)
+        if index >= 0 and index < listbox.size():
+            if not listbox.selection_includes(index):
+                listbox.selection_clear(0, tk.END)
+                listbox.selection_set(index)
+            listbox.activate(index)
         else:
-            logging.warning("Progressbar split não disponível")
-
-        current_step = 0
-
-        logging.info(f"Iniciando divisão de {len(files)} arquivos (modo: {split_mode}) -> {folder}")
-
-        for file_idx, f in enumerate(files):
-            if cancel_operation:
-                status_var.set("Operação cancelada.")
-                logging.info("Operação cancelada pelo usuário")
-                return
+            listbox.selection_clear(0, tk.END)
             
-            # VALIDAÇÃO DE SEGURANÇA
-            try:
-                validate_file_security(f)
-            except SecurityError as e:
-                logging.error(f"Arquivo rejeitado por segurança: {f} - {e}")
-                continue
+        selected_count = len(listbox.curselection())
+
+        if selected_count == 0:
+            context_menu.entryconfigure(0, state="normal")
+            context_menu.entryconfigure(1, state="disabled")
+            context_menu.entryconfigure(2, state="disabled")
+            context_menu.entryconfigure(4, label="Remover", state="disabled")
             
-            reader = safe_pdf_reader(f)
-            total_pages_file = len(reader.pages)
-            base_name = os.path.splitext(os.path.basename(f))[0]
-
-            # ===== MODO 1: EXTRAIR PÁGINAS ESPECÍFICAS =====
-            if split_mode == "extract":
-                page_ranges_input = split_pages_entry.get().strip()
-                pages_to_extract = parse_page_ranges(page_ranges_input, total_pages_file)
-                
-                writer = PdfWriter()
-                for page_idx, page_num in enumerate(pages_to_extract):
-                    if cancel_operation:
-                        return
-                    
-                    writer.add_page(reader.pages[page_num - 1])
-                    current_step += 1
-                    if progress_widget:
-                        safe_widget_config(progress_widget, value=current_step)
-                    show_status(f"Extraindo {file_idx+1}/{len(files)} - Página {page_idx+1}/{len(pages_to_extract)}", "info")
-                    root.update_idletasks()
-
-                output_name = get_default_output_name("extract", [f], page_ranges=page_ranges_input)
-                output_path = generate_unique_filename(folder, output_name)
-                
-                with open(output_path, "wb") as f_out:
-                    writer.write(f_out)
-
-            # ===== MODO 2: DIVIDIR POR INTERVALO =====
-            elif split_mode == "interval":
-                interval = int(split_interval_var.get())
-                part_num = 1
-                
-                for start_page in range(0, total_pages_file, interval):
-                    if cancel_operation:
-                        return
-                    
-                    writer = PdfWriter()
-                    end_page = min(start_page + interval, total_pages_file)
-                    
-                    for page_idx in range(start_page, end_page):
-                        writer.add_page(reader.pages[page_idx])
-                        current_step += 1
-                        if progress_widget:
-                            safe_widget_config(progress_widget, value=current_step)
-                        root.update_idletasks()
-                    
-                    output_name = f"{base_name}_parte_{part_num:02d}_pag_{start_page+1}-{end_page}.pdf"
-                    output_path = generate_unique_filename(folder, output_name)
-                    
-                    with open(output_path, "wb") as f_out:
-                        writer.write(f_out)
-                    
-                    show_status(f"Dividindo {file_idx+1}/{len(files)} - Parte {part_num} (páginas {start_page+1}-{end_page})", "info")
-                    part_num += 1
-
-            # ===== MODO 3: DIVIDIR EM X PARTES =====
-            elif split_mode == "parts":
-                num_parts = int(split_parts_var.get())
-                pages_per_part = total_pages_file // num_parts
-                remainder = total_pages_file % num_parts
-                
-                current_page = 0
-                for part_num in range(1, num_parts + 1):
-                    if cancel_operation:
-                        return
-                    
-                    writer = PdfWriter()
-                    
-                    # Distribui páginas extras nas primeiras partes
-                    part_size = pages_per_part + (1 if part_num <= remainder else 0)
-                    end_page = current_page + part_size
-                    
-                    for page_idx in range(current_page, end_page):
-                        writer.add_page(reader.pages[page_idx])
-                        current_step += 1
-                        if progress_widget:
-                            safe_widget_config(progress_widget, value=current_step)
-                        root.update_idletasks()
-                    
-                    output_name = f"{base_name}_parte_{part_num:02d}_de_{num_parts:02d}_pag_{current_page+1}-{end_page}.pdf"
-                    output_path = generate_unique_filename(folder, output_name)
-                    
-                    with open(output_path, "wb") as f_out:
-                        writer.write(f_out)
-                    
-                    show_status(f"Dividindo {file_idx+1}/{len(files)} - Parte {part_num}/{num_parts}", "info")
-                    current_page = end_page
-
-            # ===== MODO 4: DIVIDIR TODAS AS PÁGINAS (AGORA EM ÚLTIMO) =====
-            elif split_mode == "all":
-                for i, page in enumerate(reader.pages):
-                    if cancel_operation:
-                        return
-                    
-                    writer = PdfWriter()
-                    writer.add_page(page)
-                    
-                    output_name = f"{base_name}_pagina_{i+1:03d}_de_{total_pages_file:03d}.pdf"
-                    output_path = generate_unique_filename(folder, output_name)
-                    
-                    with open(output_path, "wb") as f_out:
-                        writer.write(f_out)
-
-                    current_step += 1
-                    if progress_widget:
-                        safe_widget_config(progress_widget, value=current_step)
-                    show_status(f"Processando {file_idx+1}/{len(files)} - Página {i+1}/{total_pages_file}", "info")
-                    root.update_idletasks()
-
-        # CONCLUSÃO
-        if progress_widget:
-            safe_widget_config(progress_widget, value=total_steps)
-        show_status("Operação concluída!", "success")
-        logging.info("Operação de divisão concluída com sucesso")
-        show_message_in_main_thread("Sucesso", "Operação concluída!", "info")
+        elif selected_count == 1:
+            context_menu.entryconfigure(0, state="normal")
+            context_menu.entryconfigure(1, state="normal")
+            context_menu.entryconfigure(2, state="normal")
+            context_menu.entryconfigure(4, label="Remover Selecionado", state="normal")
+            
+        else:
+            context_menu.entryconfigure(0, state="normal")
+            context_menu.entryconfigure(1, state="normal")
+            context_menu.entryconfigure(2, state="normal")
+            context_menu.entryconfigure(4, label=f"Remover os {selected_count} Itens", state="normal")
         
-    except (ValueError, SystemOverloadError) as e:
-        logging.error(f"Erro na divisão: {e}")
-        show_message_in_main_thread("Erro", str(e), "error")
-    except Exception as e:
-        logging.error(f"Falha ao processar PDFs: {e}")
-        show_message_in_main_thread("Erro", f"Falha ao processar PDFs:\n{e}", "error")
-        status_var.set("Erro ao processar arquivos.")
-    finally:
-        set_ui_state(True)
-        if progress_widget:
-            root.after(300, lambda: safe_widget_config(progress_widget, value=0))
+        context_menu.entryconfigure(5, state="normal" if listbox.size() > 0 else "disabled")
 
-def split_or_extract_pdfs(event=None):
-    if split_list.size() == 0:
-        show_message_in_main_thread("Aviso", "Nenhum arquivo adicionado.", "warning")
-        return
-    
-    # VERIFICAR LIMITES ANTES DE INICIAR
-    try:
-        total_pages = 0
-        for f in split_list.get(0, tk.END):
-            reader = safe_pdf_reader(f)
-            total_pages += len(reader.pages)
-            if total_pages > MAX_TOTAL_PAGES:
-                raise SystemOverloadError(f"Limite de {MAX_TOTAL_PAGES} páginas excedido")
-    except SystemOverloadError as e:
-        show_message_in_main_thread("Limite Excedido", str(e), "error")
-        return
-    except Exception as e:
-        logging.warning(f"Erro ao verificar limites: {e}")
-    
-    set_ui_state(False)
-    if 'btn_cancel_split' in globals():
         try:
-            btn_cancel_split.pack(pady=5)
-        except tk.TclError:
-            pass
-    submit_thread_task(split_or_extract_pdfs_thread)
+            context_menu.tk_popup(event.x_root, event.y_root)
+        finally:
+            context_menu.grab_release()
+    
+    listbox.bind("<Button-3>", show_context_menu)
+    
+    return context_menu
 
-def cancel_split():
-    global cancel_operation
-    cancel_operation = True
-    logging.info("Cancelamento solicitado pelo usuário")
-
-# -----------------------
-# Abrir PDF com duplo clique
-# -----------------------
 def open_pdf(listbox, event):
     selection = listbox.curselection()
     if not selection:
         return
     file_path = listbox.get(selection[0])
     try:
-        # VALIDAÇÃO DE SEGURANÇA ANTES DE ABRIR
         validate_file_security(file_path)
         
         if sys.platform == "win32":
             os.startfile(file_path)
-        elif sys.platform == "darwin":  # macOS
+        elif sys.platform == "darwin":
             subprocess.call(["open", file_path])
-        else:  # Linux
+        else:
             subprocess.call(["xdg-open", file_path])
         logging.info(f"Arquivo aberto: {os.path.basename(file_path)}")
     except Exception as e:
         logging.error(f"Erro ao abrir arquivo: {e}")
         show_message_in_main_thread("Erro", f"Não foi possível abrir:\n{e}", "error")
 
-# -----------------------
-# Drag & Drop de arquivos externos
-# -----------------------
 def drop(event, listbox, files_var, pages_var, size_var):
     if not DND_AVAILABLE:
         return
@@ -3002,7 +1448,6 @@ def drop(event, listbox, files_var, pages_var, size_var):
     added = 0
     invalid = []
     
-    # Verificar limite de arquivos
     current_count = listbox.size()
     if current_count + len(dropped) > MAX_FILES_PER_OPERATION:
         show_message_in_main_thread(
@@ -3036,99 +1481,806 @@ def drop(event, listbox, files_var, pages_var, size_var):
         status_var.set(f"{added} arquivo(s) adicionados via arrastar/soltar.")
         show_toast(f"{added} arquivo(s) adicionados.")
         update_stats(listbox, files_var, pages_var, size_var)
+        
+        if listbox.size() > 0:
+            for widget in listbox.master.master.winfo_children():
+                if isinstance(widget, ttk.Label) and "arraste" in widget.cget("text").lower():
+                    widget.config(text="Arquivos PDF")
+
+def validate_pdfa_protection_compatibility():
+    protect_on = protect_var.get()
+    pdfa_on = pdfa_var.get()
+    
+    if protect_on and pdfa_on:
+        return False
+    return True
+
+def toggle_password_entry(*args):
+    if hasattr(toggle_password_entry, 'processing') and toggle_password_entry.processing:
+        return
+    
+    toggle_password_entry.processing = True
+    
+    try:
+        protect_on = protect_var.get()
+        pdfa_on = pdfa_var.get()
+        
+        if protect_on and pdfa_on:
+            pdfa_var.set(False)
+            
+            show_message_in_main_thread(
+                "Compatibilidade de Formatos",
+                "Proteção por senha e PDF/A-2B são incompatíveis.\n\n"
+                "Solução automática: Proteção por senha foi ativada e PDF/A-2B desativado.\n\n"
+                "Motivo técnico: O padrão PDF/A-2B não suporta criptografia por senha.\n"
+                "Para documentos protegidos, use o formato PDF padrão.",
+                "info"
+            )
+        
+        protect_on_final = protect_var.get()
+        pdfa_on_final = pdfa_var.get()
+        
+        if protect_on_final and not pdfa_on_final:
+            safe_widget_config(password_entry, state="normal")
+            if not password_entry.get().strip():
+                password_entry.focus_set()
+        else:
+            safe_widget_config(password_entry, state="disabled")
+            password_entry.delete(0, tk.END)
+            
+    finally:
+        toggle_password_entry.processing = False
+
+def toggle_compress_combo(*args):
+    safe_widget_config(compress_combo, state="normal" if compress_var.get() else "disabled")
+
+def merge_pdfs_thread():
+    global cancel_operation
+    cancel_operation = False
+
+    files = merge_list.get(0, tk.END)
+    if not files:
+        show_message_in_main_thread("Erro", "Nenhum arquivo PDF selecionado.", "error")
+        return
+
+    password = password_entry.get().strip()
+    
+    log_audit_event("merge_start", files, options={
+        'pdfa': pdfa_var.get(),
+        'protected': protect_var.get() and bool(password),
+        'compress': compress_var.get(),
+        'remove_metadata': meta_var.get(),
+        'file_count': len(files)
+    })
+    
+    if len(files) > MAX_FILES_PER_OPERATION:
+        show_message_in_main_thread("Erro", f"Máximo de {MAX_FILES_PER_OPERATION} arquivos por operação.", "error")
+        return
+
+    folder = merge_output_entry.get() or os.path.dirname(files[0])
+    
+    try:
+        os.makedirs(folder, exist_ok=True)
+    except Exception as e:
+        show_message_in_main_thread("Erro", f"Não foi possível criar diretório:\n{folder}\n\nErro: {e}", "error")
+        return
+
+    password = password_entry.get().strip()
+    
+    custom_name = merge_filename_entry.get().strip()
+    if custom_name and custom_name != "Deixe vazio para nome automático":
+        output_name = custom_name
+        if not output_name.lower().endswith(".pdf"):
+            output_name += ".pdf"
+    else:
+        output_name = get_default_output_name(
+            "merge", 
+            files,
+            options={
+                'compress': compress_var.get(),
+                'pdfa': pdfa_var.get(),
+                'protected': protect_var.get() and bool(password)
+            }
+        )
+    
+    output_path = generate_unique_filename(folder, output_name)
+    remove_meta = meta_var.get()
+    convert_pdfa = pdfa_var.get()
+
+    total_steps = len(files) + 3
+    current_step = 0
+    
+    progress_widget = None
+    if 'progress_merge' in globals():
+        progress_widget = progress_merge
+        safe_widget_config(progress_widget, maximum=total_steps)
+        safe_widget_config(progress_widget, value=current_step)
+
+    temp_files_to_cleanup = []
+
+    try:
+        create_operation_checkpoint("merge", [], current_step, temp_files_to_cleanup)
+        
+        logging.info(f"Iniciando união de {len(files)} arquivos -> {output_path}")
+        
+        merger = PdfMerger()
+        
+        for idx, f in enumerate(files):
+            if cancel_operation:
+                status_var.set("Operação cancelada.")
+                logging.info("Operação cancelada pelo usuário")
+                return
+                
+            try:
+                validate_file_security(f)
+            except SecurityError as e:
+                logging.error(f"Arquivo rejeitado: {f} - {e}")
+                show_message_in_main_thread("Erro de Segurança", f"Arquivo rejeitado:\n{os.path.basename(f)}\n\nMotivo: {e}", "error")
+                return
+            
+            merger.append(f)
+            current_step += 1
+            if progress_widget:
+                safe_widget_config(progress_widget, value=current_step)
+            
+            create_operation_checkpoint("merge", files[:idx+1], current_step, temp_files_to_cleanup)
+            show_status(f"Unindo {idx + 1}/{len(files)}: {os.path.basename(f)}", "info")
+            root.update_idletasks()
+
+        temp_output = safe_temp_file(prefix="merge", suffix=".pdf")
+        temp_files_to_cleanup.append(temp_output)
+        
+        with open(temp_output, "wb") as f_out:
+            merger.write(f_out)
+        merger.close()
+        
+        current_step += 1
+        if progress_widget:
+            safe_widget_config(progress_widget, value=current_step)
+        show_status("Salvando arquivo unido...", "info")
+        root.update_idletasks()
+        
+        current_temp = temp_output
+
+        if (not pdfa_var.get()) and protect_var.get() and password:
+            current_step += 1
+            if progress_widget:
+                safe_widget_config(progress_widget, value=current_step)
+            status_var.set("Aplicando proteção...")
+            root.update_idletasks()
+            
+            try:
+                reader = PdfReader(current_temp)
+                writer = PdfWriter()
+                
+                for page in reader.pages:
+                    writer.add_page(page)
+                
+                if protect_var.get() and password:
+                    aplicar_criptografia(writer, password)
+                    logging.info(f"Proteção aplicada ao PDF final")
+                
+                if remove_meta:
+                    writer.add_metadata({})
+                elif reader.metadata:
+                    writer.add_metadata(reader.metadata)
+                
+                temp_protected = safe_temp_file(prefix="protected", suffix=".pdf")
+                temp_files_to_cleanup.append(temp_protected)
+                
+                with open(temp_protected, "wb") as f_out:
+                    writer.write(f_out)
+                    
+                if current_temp in temp_files_to_cleanup:
+                    temp_files_to_cleanup.remove(current_temp)
+                remove_temp_file(current_temp)
+                try:
+                    os.remove(current_temp)
+                except:
+                    pass
+                    
+                current_temp = temp_protected
+                
+            except Exception as e:
+                logging.warning(f"Falha na proteção: {e}")
+                show_message_in_main_thread("Aviso", f"Proteção falhou: {e}\n\nContinuando sem proteção.", "warning")
+
+        if compress_var.get() and GHOSTSCRIPT_PATH:
+            try:
+                current_step += 1
+                if progress_widget:
+                    safe_widget_config(progress_widget, value=current_step)
+                
+                show_status("Comprimindo PDF...", "info")
+                root.update_idletasks()
+                
+                temp_comprimido = safe_temp_file(prefix="compressed", suffix=".pdf")
+                temp_files_to_cleanup.append(temp_comprimido)
+                
+                nivel_compressao = compress_level.get()
+                reducao = comprimir_com_ghostscript(current_temp, temp_comprimido, nivel_compressao)
+                
+                if os.path.exists(temp_comprimido) and os.path.getsize(temp_comprimido) > 0:
+                    if current_temp in temp_files_to_cleanup:
+                        temp_files_to_cleanup.remove(current_temp)
+                    remove_temp_file(current_temp)
+                    try:
+                        os.remove(current_temp)
+                    except:
+                        pass
+                    
+                    current_temp = temp_comprimido
+                    show_status(f"PDF comprimido: redução de {reducao:.1f}%", "success")
+                else:
+                    logging.warning("Arquivo comprimido inválido")
+                    show_message_in_main_thread("Aviso", "Compressão falhou - mantendo PDF original", "warning")
+                    
+            except Exception as e:
+                logging.warning(f"Falha na compressão: {e}")
+                show_message_in_main_thread("Aviso", f"Compressão falhou: {e}\n\nContinuando com PDF não comprimido.", "warning")
+
+        os.replace(current_temp, output_path)
+        
+        show_status("Validando integridade do PDF...", "info")
+        root.update_idletasks()
+        
+        validation_password = password if (protect_var.get() and password) else None
+        is_valid, validation_msg = validate_output_pdf(output_path, validation_password)
+        if not is_valid:
+            logging.error(f"PDF de saída inválido: {validation_msg}")
+            
+            fallback_success = False
+            if os.path.exists(current_temp):
+                try:
+                    logging.info("Tentando fallback...")
+                    os.replace(current_temp, output_path)
+                    is_valid, validation_msg = validate_output_pdf(output_path)
+                    if is_valid:
+                        fallback_success = True
+                        logging.info("Fallback bem-sucedido!")
+                except Exception as fallback_error:
+                    logging.error(f"Falha no fallback: {fallback_error}")
+            
+            if not fallback_success:
+                try:
+                    if os.path.exists(output_path):
+                        os.remove(output_path)
+                except:
+                    pass
+                raise PDFProcessingError(f"Falha na validação: {validation_msg}")
+        
+        tamanho_final = os.path.getsize(output_path) / 1024 / 1024
+        log_audit_event("merge_success", files, options={
+            'output_path': output_path,
+            'final_size_mb': round(tamanho_final, 2),
+            'compression_applied': compress_var.get(),
+            'pdfa_applied': pdfa_var.get(),
+            'protection_applied': protect_var.get() and bool(password)
+        })
+        
+        show_status(f"PDF criado e validado: {output_path} ({tamanho_final:.1f} MB)", "success")
+        logging.info(f"PDF unido criado: {output_path} ({tamanho_final:.1f} MB)")
+        
+        def show_success_dialog():
+            result = messagebox.askyesno(
+                "Sucesso", 
+                f"PDF salvo em:\n{output_path}\nTamanho: {tamanho_final:.1f} MB\n\nDeseja abrir a pasta de saída?",
+                icon='info'
+            )
+            if result:
+                try:
+                    if sys.platform == "win32":
+                        os.startfile(folder)
+                    elif sys.platform == "darwin":
+                        subprocess.call(["open", folder])
+                    else:
+                        subprocess.call(["xdg-open", folder])
+                except Exception as e:
+                    logging.error(f"Erro ao abrir pasta: {e}")
+        
+        root.after(0, show_success_dialog)
+
+    except Exception as e:
+        log_audit_event("merge_error", files, options={
+            'error': str(e),
+            'error_type': type(e).__name__
+        })
+        
+        logging.error(f"Falha ao unir PDFs: {e}")
+        show_message_in_main_thread("Erro", f"Falha ao unir PDFs:\n{e}", "error")
+        status_var.set("Erro ao unir arquivos.")
+    finally:
+        for temp_file in temp_files_to_cleanup:
+            try:
+                if os.path.exists(temp_file):
+                    os.remove(temp_file)
+                    remove_temp_file(temp_file)
+            except Exception as e:
+                logging.warning(f"Erro ao limpar {temp_file}: {e}")
+        
+        cleanup_checkpoint()
+        
+        root.after(0, reset_ui_state)
+        
+        logging.info("Limpeza pós-operação concluída")
+
+def merge_pdfs(event=None):
+    if merge_list.size() == 0:
+        show_message_in_main_thread("Aviso", "Nenhum arquivo adicionado.", "warning")
+        return
+    
+    try:
+        total_pages = 0
+        for f in merge_list.get(0, tk.END):
+            reader = safe_pdf_reader(f)
+            total_pages += len(reader.pages)
+            if total_pages > MAX_TOTAL_PAGES:
+                raise SystemOverloadError(f"Limite de {MAX_TOTAL_PAGES} páginas excedido")
+    except SystemOverloadError as e:
+        show_message_in_main_thread("Limite Excedido", str(e), "error")
+        return
+    except Exception as e:
+        logging.warning(f"Erro ao verificar limites: {e}")
+    
+    set_ui_state(False)
+    if 'btn_cancel_merge' in globals():
+        try:
+            btn_cancel_merge.pack(pady=5)
+        except tk.TclError:
+            pass
+    submit_thread_task(merge_pdfs_thread)
+
+def cancel_merge():
+    global cancel_operation
+    cancel_operation = True
+    logging.info("Cancelamento da união solicitado")
+    show_status("Cancelando operação...", "warning")
+    root.after(1000, reset_ui_state)
+
+def split_or_extract_pdfs_thread():
+    global cancel_operation
+    cancel_operation = False
+    
+    files = split_list.get(0, tk.END)
+    if not files:
+        show_message_in_main_thread("Erro", "Nenhum arquivo PDF selecionado.", "error")
+        return
+
+    try:
+        split_mode = split_mode_var.get()
+        options = {}
+        
+        if split_mode == "extract":
+            page_ranges_input = split_pages_entry.get().strip()
+            if not page_ranges_input:
+                show_message_in_main_thread("Erro", "Especifique os intervalos de páginas.", "error")
+                return
+            options['page_ranges'] = page_ranges_input
+            
+        elif split_mode == "interval":
+            try:
+                interval = int(split_interval_var.get())
+                if interval < 1:
+                    raise ValueError
+                options['interval'] = interval
+            except ValueError:
+                show_message_in_main_thread("Erro", "Intervalo deve ser um número inteiro maior que 0.", "error")
+                return
+            
+        elif split_mode == "parts":
+            try:
+                parts = int(split_parts_var.get())
+                if parts < 1:
+                    raise ValueError
+                options['parts'] = parts
+            except ValueError:
+                show_message_in_main_thread("Erro", "Número de partes deve ser um inteiro maior que 0.", "error")
+                return
+        
+        total_input_pages, total_output_estimate = validate_split_limits(files, split_mode, options)
+        
+        if total_output_estimate > 50:
+            def ask_confirmation():
+                result = messagebox.askyesno(
+                    "Confirmação de Operação",
+                    f"Esta operação irá gerar aproximadamente {total_output_estimate} arquivos "
+                    f"a partir de {len(files)} arquivo(s) e {total_input_pages} página(s).\n\n"
+                    f"Deseja continuar?",
+                    icon='warning'
+                )
+                if not result:
+                    raise SystemOverloadError("Operação cancelada pelo usuário")
+            
+            root.after(0, ask_confirmation)
+            time.sleep(0.5)
+            if cancel_operation:
+                return
+                
+    except SystemOverloadError as e:
+        show_message_in_main_thread("Limite Excedido", str(e), "error")
+        return
+    except Exception as e:
+        logging.error(f"Erro na validação: {e}")
+        show_message_in_main_thread("Erro", f"Erro na validação: {e}", "error")
+        return
+
+    folder = split_output_entry.get() or os.path.dirname(files[0])
+    
+    try:
+        os.makedirs(folder, exist_ok=True)
+    except Exception as e:
+        show_message_in_main_thread("Erro", f"Não foi possível criar diretório:\n{folder}\n\nErro: {e}", "error")
+        return
+
+    convert_pdfa = pdfa_var_split.get()
+
+    try:
+        total_pages_to_process = total_input_pages
+        extra_steps = 2 if pdfa_var_split.get() and PDFA_AVAILABLE else 1
+        total_steps = total_pages_to_process + extra_steps
+        
+        progress_widget = None
+        if 'progress_split' in globals():
+            progress_widget = progress_split
+            safe_widget_config(progress_widget, maximum=max(1, total_steps))
+            safe_widget_config(progress_widget, value=0)
+
+        current_step = 0
+        files_processed = 0
+        total_files_created = 0
+
+        logging.info(f"Iniciando divisão de {len(files)} arquivos (modo: {split_mode}) -> {folder}")
+
+        for file_idx, f in enumerate(files):
+            if cancel_operation:
+                status_var.set("Operação cancelada.")
+                logging.info("Operação cancelada")
+                return
+            
+            try:
+                validate_file_security(f)
+            except SecurityError as e:
+                logging.error(f"Arquivo rejeitado: {f} - {e}")
+                continue
+            
+            reader = safe_pdf_reader(f)
+            total_pages_file = len(reader.pages)
+            base_name = os.path.splitext(os.path.basename(f))[0]
+
+            if split_mode == "extract":
+                page_ranges_input = split_pages_entry.get().strip()
+                pages_to_extract = parse_page_ranges(page_ranges_input, total_pages_file)
+                
+                if len(pages_to_extract) > 100:
+                    show_message_in_main_thread(
+                        "Limite de Extração", 
+                        f"Extração limitada a 100 páginas por arquivo.\n"
+                        f"Solicitado: {len(pages_to_extract)} páginas.",
+                        "warning"
+                    )
+                    pages_to_extract = pages_to_extract[:100]
+                
+                writer = PdfWriter()
+                for page_idx, page_num in enumerate(pages_to_extract):
+                    if cancel_operation:
+                        return
+                    
+                    writer.add_page(reader.pages[page_num - 1])
+                    current_step += 1
+                    if progress_widget:
+                        safe_widget_config(progress_widget, value=current_step)
+                    show_status(f"Extraindo {file_idx+1}/{len(files)} - Página {page_idx+1}/{len(pages_to_extract)}", "info")
+                    root.update_idletasks()
+
+                output_name = get_default_output_name("extract", [f], page_ranges=page_ranges_input)
+                output_path = generate_unique_filename(folder, output_name)
+                
+                with open(output_path, "wb") as f_out:
+                    writer.write(f_out)
+                
+                total_files_created += 1
+                files_processed += 1
+
+            elif split_mode == "interval":
+                interval = int(split_interval_var.get())
+                part_num = 1
+                
+                for start_page in range(0, total_pages_file, interval):
+                    if cancel_operation:
+                        return
+                    
+                    if part_num > 50:
+                        logging.warning(f"Limite de partes atingido para {base_name}")
+                        break
+                    
+                    writer = PdfWriter()
+                    end_page = min(start_page + interval, total_pages_file)
+                    
+                    for page_idx in range(start_page, end_page):
+                        writer.add_page(reader.pages[page_idx])
+                        current_step += 1
+                        if progress_widget:
+                            safe_widget_config(progress_widget, value=current_step)
+                        root.update_idletasks()
+                    
+                    output_name = f"{base_name}_parte_{part_num:02d}_pag_{start_page+1}-{end_page}.pdf"
+                    output_path = generate_unique_filename(folder, output_name)
+                    
+                    with open(output_path, "wb") as f_out:
+                        writer.write(f_out)
+                    
+                    show_status(f"Dividindo {file_idx+1}/{len(files)} - Parte {part_num} (páginas {start_page+1}-{end_page})", "info")
+                    part_num += 1
+                    total_files_created += 1
+                
+                files_processed += 1
+
+            elif split_mode == "parts":
+                num_parts = int(split_parts_var.get())
+                num_parts = min(num_parts, total_pages_file)
+                pages_per_part = total_pages_file // num_parts
+                remainder = total_pages_file % num_parts
+                
+                current_page = 0
+                for part_num in range(1, num_parts + 1):
+                    if cancel_operation:
+                        return
+                    
+                    writer = PdfWriter()
+                    
+                    part_size = pages_per_part + (1 if part_num <= remainder else 0)
+                    end_page = current_page + part_size
+                    
+                    for page_idx in range(current_page, end_page):
+                        writer.add_page(reader.pages[page_idx])
+                        current_step += 1
+                        if progress_widget:
+                            safe_widget_config(progress_widget, value=current_step)
+                        root.update_idletasks()
+                    
+                    output_name = f"{base_name}_parte_{part_num:02d}_de_{num_parts:02d}_pag_{current_page+1}-{end_page}.pdf"
+                    output_path = generate_unique_filename(folder, output_name)
+                    
+                    with open(output_path, "wb") as f_out:
+                        writer.write(f_out)
+                    
+                    show_status(f"Dividindo {file_idx+1}/{len(files)} - Parte {part_num}/{num_parts}", "info")
+                    current_page = end_page
+                    total_files_created += 1
+                
+                files_processed += 1
+
+            elif split_mode == "all":
+                for i, page in enumerate(reader.pages):
+                    if cancel_operation:
+                        return
+                    
+                    if i >= MAX_PAGES_FOR_SINGLE_FILE_SPLIT:
+                        logging.warning(f"Limite de páginas individuais atingido para {base_name}")
+                        break
+                    
+                    writer = PdfWriter()
+                    writer.add_page(page)
+                    
+                    output_name = f"{base_name}_pagina_{i+1:03d}_de_{total_pages_file:03d}.pdf"
+                    output_path = generate_unique_filename(folder, output_name)
+                    
+                    with open(output_path, "wb") as f_out:
+                        writer.write(f_out)
+
+                    current_step += 1
+                    if progress_widget:
+                        safe_widget_config(progress_widget, value=current_step)
+                    show_status(f"Processando {file_idx+1}/{len(files)} - Página {i+1}/{total_pages_file}", "info")
+                    root.update_idletasks()
+                    total_files_created += 1
+                
+                files_processed += 1
+
+            if total_files_created >= MAX_TOTAL_OUTPUT_FILES:
+                show_message_in_main_thread(
+                    "Limite Atingido",
+                    f"Limite de {MAX_TOTAL_OUTPUT_FILES} arquivos criados atingido.\n"
+                    f"Processamento interrompido após {files_processed} de {len(files)} arquivos.",
+                    "warning"
+                )
+                break
+
+        if progress_widget:
+            safe_widget_config(progress_widget, value=total_steps)
+        
+        show_status(f"Operação concluída! Criados {total_files_created} arquivos.", "success")
+        logging.info(f"Operação de divisão concluída: {total_files_created} arquivos criados")
+        
+        def show_success():
+            messagebox.showinfo(
+                "Sucesso", 
+                f"Operação concluída!\n\n"
+                f"Arquivos processados: {files_processed}/{len(files)}\n"
+                f"Arquivos criados: {total_files_created}\n"
+                f"Pasta de saída: {folder}",
+                icon='info'
+            )
+        
+        root.after(0, show_success)
+        
+    except (ValueError, SystemOverloadError) as e:
+        logging.error(f"Erro na divisão: {e}")
+        show_message_in_main_thread("Erro", str(e), "error")
+    except Exception as e:
+        logging.error(f"Falha ao processar PDFs: {e}")
+        show_message_in_main_thread("Erro", f"Falha ao processar PDFs:\n{e}", "error")
+        status_var.set("Erro ao processar arquivos.")
+    finally:
+        root.after(0, reset_ui_state)
+        
+        if progress_widget:
+            root.after(300, lambda: safe_widget_config(progress_widget, value=0))
+
+def split_or_extract_pdfs(event=None):
+    if split_list.size() == 0:
+        show_message_in_main_thread("Aviso", "Nenhum arquivo adicionado.", "warning")
+        return
+    
+    if split_list.size() > MAX_FILES_FOR_SPLIT:
+        show_message_in_main_thread(
+            "Limite Excedido", 
+            f"Máximo de {MAX_FILES_FOR_SPLIT} arquivos para divisão.\n"
+            f"Selecionados: {split_list.size()}",
+            "error"
+        )
+        return
+    
+    set_ui_state(False)
+    if 'btn_cancel_split' in globals():
+        try:
+            btn_cancel_split.pack(pady=5)
+        except tk.TclError:
+            pass
+    submit_thread_task(split_or_extract_pdfs_thread)
+
+def cancel_split():
+    global cancel_operation
+    cancel_operation = True
+    logging.info("Cancelamento da divisão solicitado")
+    show_status("Cancelando operação...", "warning")
+    root.after(1000, reset_ui_state)
+
+def executar_operacao_aba_ativa(event=None):
+    current_tab = notebook.index(notebook.select())
+    
+    logging.info(f"Executando operação da aba {current_tab}")
+    
+    if current_tab == 0:
+        logging.info("Iniciando união de PDFs via CTRL+R")
+        merge_pdfs()
+    elif current_tab == 1:
+        logging.info("Iniciando divisão de PDFs via CTRL+R")
+        split_or_extract_pdfs()
+    else:
+        logging.warning(f"Aba desconhecida: {current_tab}")
+
 def on_closing():
-    """Função para fechar o programa corretamente"""
     global cancel_operation
     cancel_operation = True
     cleanup_temp_files()
     root.quit()
     root.destroy()
-# =============================================================================
-# CONFIGURAÇÃO DA INTERFACE GRÁFICA
-# =============================================================================
-root.title("JuntaPDF")
-root.geometry("900x780")
-root.resizable(True, True)
 
-# Define ícone (opcional)
-try:
-    root.iconbitmap("pdf_icon.ico")
-except:
-    pass
+def show_environment_check():
+    try:
+        info = f"""Verificação do Ambiente JuntaPDF:
 
-# =============================================================================
-# NOVO: MENU PRINCIPAL
-# =============================================================================
-menubar = tk.Menu(root)
+PyPDF2: {'Disponível' if PDF_LIBS_AVAILABLE else 'Não disponível'}
+pikepdf: {'Disponível' if PIKEPDF_AVAILABLE else 'Não disponível'}
+Ghostscript: {GHOSTSCRIPT_PATH if GHOSTSCRIPT_PATH else 'Não encontrado'}
+PDF/A: {'Disponível' if PDFA_AVAILABLE else 'Indisponível'}
+Drag & Drop: {'Disponível' if DND_AVAILABLE else 'Não disponível'}
 
-# Menu "Arquivo" - NOVO
-arquivo_menu = tk.Menu(menubar, tearoff=0)
+Python: {sys.version}
+Sistema: {sys.platform}"""
+        
+        messagebox.showinfo("Verificação de Ambiente", info)
+    except Exception as e:
+        messagebox.showerror("Erro", f"Erro ao verificar ambiente: {e}")
 
-def get_current_tab_components():
-    """Retorna os componentes da aba ativa atual"""
-    current_tab = notebook.select()
-    tabs = notebook.tabs()
+def show_performance_dashboard():
+    dialog = tk.Toplevel(root)
+    dialog.title("Dashboard de Performance - JuntaPDF")
+    dialog.geometry("500x400")
+    dialog.resizable(False, False)
+    dialog.transient(root)
+    dialog.grab_set()
+
+    main_frame = ttk.Frame(dialog, padding="15")
+    main_frame.pack(fill="both", expand=True)
+
+    title_label = ttk.Label(
+        main_frame, 
+        text="Dashboard de Performance", 
+        font=("Segoe UI", 12, "bold")
+    )
+    title_label.pack(pady=(0, 15))
+
+    metrics_frame = ttk.LabelFrame(main_frame, text="Métricas do Sistema", padding="10")
+    metrics_frame.pack(fill="both", expand=True, pady=5)
     
-    if current_tab == tabs[0]:  # Aba Juntar PDFs
-        return merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var
-    elif current_tab == tabs[1]:  # Aba Dividir PDFs  
-        return split_list, total_files_split_var, total_pages_split_var, total_size_split_var
-    return merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var  # fallback
+    if not PSUtil_AVAILABLE:
+        warning_frame = ttk.Frame(metrics_frame)
+        warning_frame.pack(fill="x", padx=5, pady=5)
+        
+        ttk.Label(
+            warning_frame, 
+            text="Métricas limitadas - instale 'pip install psutil' para monitoramento completo",
+            foreground="orange",
+            font=("Segoe UI", 8, "bold"),
+            justify="center"
+        ).pack()
 
-def menu_adicionar_arquivos():
-    """Adiciona arquivos na aba atual"""
-    listbox, files_var, pages_var, size_var = get_current_tab_components()
-    add_files(listbox, files_var, pages_var, size_var)
+    try:
+        import psutil
+        process = psutil.Process()
+        memory_mb = process.memory_info().rss / 1024 / 1024
+        cpu_percent = process.cpu_percent(interval=0.1)
+        thread_count = process.num_threads()
+    except ImportError:
+        memory_mb = "N/A (instale psutil)"
+        cpu_percent = "N/A"
+        thread_count = "N/A"
 
-def menu_remover_selecionados():
-    """Remove selecionados na aba atual"""
-    listbox, files_var, pages_var, size_var = get_current_tab_components()
-    remove_selected(listbox, files_var, pages_var, size_var)
+    metrics = {
+        "Arquivos em Cache": f"{len(pdf_metadata_cache)}",
+        "Threads Ativas": f"{thread_count}",
+        "Memória Utilizada": f"{memory_mb:.1f} MB" if isinstance(memory_mb, float) else memory_mb,
+        "CPU em Uso": f"{cpu_percent}%" if isinstance(cpu_percent, float) else cpu_percent,
+        "Arquivos Temporários": f"{len(temp_files_global)}",
+        "Operações Canceladas": "0",
+        "PDFs Válidos": f"{sum(1 for f in pdf_metadata_cache if 'Erro' not in f)}",
+        "PDFs com Erro": f"{sum(1 for f in pdf_metadata_cache if 'Erro' in f)}"
+    }
 
-def menu_limpar_lista():
-    """Limpa lista na aba atual"""
-    listbox, files_var, pages_var, size_var = get_current_tab_components()
-    clear_list(listbox, files_var, pages_var, size_var)
+    for i, (k, v) in enumerate(metrics.items()):
+        ttk.Label(metrics_frame, text=k, font=("Segoe UI", 9, "bold")).grid(
+            row=i, column=0, sticky="w", padx=5, pady=3
+        )
+        ttk.Label(metrics_frame, text=str(v), font=("Consolas", 9)).grid(
+            row=i, column=1, sticky="w", padx=10, pady=3
+        )
 
-# Adiciona itens ao menu Arquivo
-arquivo_menu.add_command(
-    label="Adicionar Arquivos (Ctrl+O)", 
-    command=menu_adicionar_arquivos,
-    accelerator="Ctrl+O"
-)
+    button_frame = ttk.Frame(main_frame)
+    button_frame.pack(fill="x", pady=15)
 
-arquivo_menu.add_command(
-    label="Remover Selecionados (Del)", 
-    command=menu_remover_selecionados,
-    accelerator="Del"
-)
+    def clear_cache():
+        pdf_metadata_cache.clear()
+        show_toast("Cache limpo!")
+        dialog.destroy()
+        show_performance_dashboard()
 
-arquivo_menu.add_command(
-    label="Limpar Lista (Ctrl+L)", 
-    command=menu_limpar_lista,
-    accelerator="Ctrl+L"
-)
+    def cleanup_temp_files_manual():
+        cleanup_temp_files()
+        show_toast("Arquivos temporários limpos!")
+        dialog.destroy()
+        show_performance_dashboard()
 
-arquivo_menu.add_separator()
+    ttk.Button(button_frame, text="Atualizar", 
+              command=lambda: dialog.destroy() or show_performance_dashboard()).pack(side="left", padx=5)
+    
+    ttk.Button(button_frame, text="Limpar Cache", 
+              command=clear_cache).pack(side="left", padx=5)
+    
+    ttk.Button(button_frame, text="Limpar Temporários", 
+              command=cleanup_temp_files_manual).pack(side="left", padx=5)
+    
+    ttk.Button(button_frame, text="Fechar", 
+              command=dialog.destroy).pack(side="right", padx=5)
 
-arquivo_menu.add_command(
-    label="Sair", 
-    command=on_closing,
-    accelerator="Esc"
-)
+    dialog.focus_set()
 
-menubar.add_cascade(label="Arquivo", menu=arquivo_menu)
-
-# Menu "Sobre JuntaPDF" (já existente)
-sobre_menu = tk.Menu(menubar, tearoff=0)
-
-# Licenças & Créditos
 def mostrar_licencas():
     janela_licencas = tk.Toplevel(root)
     janela_licencas.title("Licenças & Créditos - JuntaPDF")
     janela_licencas.geometry("600x500")
     
-    # Frame com scrollbar
     frame = tk.Frame(janela_licencas)
     frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
     
@@ -3139,10 +2291,9 @@ def mostrar_licencas():
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
     text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     
-    # Texto
     texto = """Este software foi desenvolvido integrando bibliotecas de código aberto, garantindo transparência e segurança para uso institucional e corporativo.
 
-🛠 BIBLIOTECAS UTILIZADAS
+BIBLIOTECAS UTILIZADAS
 
 • PyPDF2 – Licença BSD-3-Clause
 • PNeFOP – Licença Mozilla Public License 2.0
@@ -3151,11 +2302,11 @@ def mostrar_licencas():
 
 *Uso do Ghostscript: permitido internamente. Em redistribuições, é necessário incluir o aviso de licença da Artifex Software ou utilizar uma instalação separada do Ghostscript.
 
-📄 DIREITOS AUTORAIS
+DIREITOS AUTORAIS
 
 O código do JuntaPDF é de autoria independente e não deriva diretamente das bibliotecas utilizadas. Esta ferramenta combina e automatiza funcionalidades sem alterar os componentes originais, respeitando integralmente suas licenças.
 
-🔒 OBSERVAÇÃO IMPORTANTE
+OBSERVAÇÃO IMPORTANTE
 
 O JuntaPDF processa arquivos localmente. NENHUM DADO É ENVIADO PARA A INTERNET. A responsabilidade pelo conteúdo dos arquivos processados é inteiramente do usuário.
 
@@ -3163,570 +2314,482 @@ Desenvolvido por Angelo Filho"""
     
     text_widget.insert(tk.END, texto)
     
-    # Aplicar negrito
     text_widget.tag_configure("bold", font=("Arial", 10, "bold"))
-    text_widget.tag_add("bold", "3.0", "3.20")   # BIBLIOTECAS UTILIZADAS
-    text_widget.tag_add("bold", "11.0", "11.16") # DIREITOS AUTORAIS
-    text_widget.tag_add("bold", "16.0", "16.21") # OBSERVAÇÃO IMPORTANTE
-    text_widget.tag_add("bold", "18.0", "18.35") # NENHUM DADO É ENVIADO...
+    text_widget.tag_add("bold", "3.0", "3.20")
+    text_widget.tag_add("bold", "11.0", "11.16")
+    text_widget.tag_add("bold", "16.0", "16.21")
+    text_widget.tag_add("bold", "18.0", "18.35")
     
     text_widget.config(state=tk.DISABLED)
 
-# PRIMEIRO: Licenças & Créditos
-sobre_menu.add_command(
-    label="Licenças & Créditos", 
-    command=mostrar_licencas
-)
-
-# SEGUNDO: Verificar Ambiente
-sobre_menu.add_command(label="Verificar Ambiente", command=show_environment_check)
-
-# TERCEIRO: Dashboard de Performance
-sobre_menu.add_command(label="Dashboard de Performance", command=show_performance_dashboard)
-
-menubar.add_cascade(label="Sobre o JuntaPDF", menu=sobre_menu)
-
-root.config(menu=menubar)
-
-# Barra de status
-status_label = ttk.Label(root, textvariable=status_var, foreground="blue")
-status_label.pack(side="bottom", pady=5)
-
-# Status inicial com detecção de recursos
-status_parts = ["Pronto"]
-if DND_AVAILABLE:
-    status_parts.append("Drag & Drop ✓")
-if PDFA_AVAILABLE:
-    status_parts.append("PDF/A ✓")
-else:
-    status_parts.append("PDF/A ✗ (Ghostscript não detectado)")
-
-status_var.set(" | ".join(status_parts))
-
-notebook = ttk.Notebook(root)
-notebook.pack(fill="both", expand=True, padx=10, pady=5)
-
-# -----------------------
-# Aba Juntar PDFs - REDESENHADA
-# -----------------------
-merge_frame = ttk.Frame(notebook)
-notebook.add(merge_frame, text="Juntar PDFs")
-
-# Frame de arquivos
-frame_files_merge = ttk.LabelFrame(merge_frame, text="Arquivos PDF (arraste para reordenar)")
-frame_files_merge.pack(fill="both", expand=True, padx=10, pady=5)
-
-# Estatísticas
-stats_frame_merge = ttk.Frame(frame_files_merge)
-stats_frame_merge.pack(fill="x", padx=5, pady=5)
-ttk.Label(stats_frame_merge, textvariable=total_files_merge_var, font=("Segoe UI", 9, "bold")).pack(side="left", padx=10)
-ttk.Label(stats_frame_merge, textvariable=total_pages_merge_var, font=("Segoe UI", 9, "bold")).pack(side="left", padx=10) 
-ttk.Label(stats_frame_merge, textvariable=total_size_merge_var, font=("Segoe UI", 9, "bold")).pack(side="left", padx=10)
-
-# Listbox
-merge_list_frame = ttk.Frame(frame_files_merge)
-merge_list_frame.pack(fill="both", expand=True, padx=5, pady=5)
-merge_list = tk.Listbox(merge_list_frame, selectmode=tk.EXTENDED, width=85, height=12, exportselection=False)
-merge_list.pack(side=tk.LEFT, fill="both", expand=True)
-
-if DND_AVAILABLE:
-    merge_list.drop_target_register(DND_FILES)
-    merge_list.dnd_bind('<<Drop>>', lambda e: drop(e, merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var))
-
-merge_list.bind("<Double-1>", lambda e: open_pdf(merge_list, e))
-attach_dynamic_tooltips(merge_list)
-setup_drag_reorder(merge_list)
-# 🚨 CORREÇÃO: Menu de contexto adicionado
-setup_context_menu(merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var)
-
-merge_list.bind("<Shift-Up>", lambda e: (move_up(merge_list), "break")[1])
-merge_list.bind("<Shift-Down>", lambda e: (move_down(merge_list), "break")[1])
-
-scroll_merge = ttk.Scrollbar(merge_list_frame, orient="vertical", command=merge_list.yview)
-scroll_merge.pack(side=tk.RIGHT, fill="y")
-merge_list.config(yscrollcommand=scroll_merge.set)
-
-# BOTÕES DE CONTROLE - REORGANIZADOS
-btn_frame_merge = ttk.Frame(merge_frame)
-btn_frame_merge.pack(fill="x", padx=10, pady=8)
-
-# Linha 1: Gerenciamento de Arquivos
-ttk.Label(btn_frame_merge, text="Gerenciar Arquivos:", font=("Segoe UI", 9, "bold")).grid(row=0, column=0, padx=(0,5), pady=2, sticky="w")
-ttk.Button(btn_frame_merge, text="Adicionar (Ctrl+O)", 
-          command=lambda: add_files(merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var)).grid(row=0, column=1, padx=2, pady=2)
-ttk.Button(btn_frame_merge, text="Remover (Del)", 
-          command=lambda: remove_selected(merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var)).grid(row=0, column=2, padx=2, pady=2)
-ttk.Button(btn_frame_merge, text="Limpar (Ctrl+L)", 
-          command=lambda: clear_list(merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var)).grid(row=0, column=3, padx=2, pady=2)
-
-# Linha 2: Organização
-ttk.Label(btn_frame_merge, text="Organizar:", font=("Segoe UI", 9, "bold")).grid(row=1, column=0, padx=(0,5), pady=2, sticky="w")
-ttk.Button(btn_frame_merge, text="Mover ↑ (Shift+↑)", command=lambda: move_up(merge_list), width=16).grid(row=1, column=1, padx=2, pady=2)
-ttk.Button(btn_frame_merge, text="Mover ↓ (Shift+↓)", command=lambda: move_down(merge_list), width=16).grid(row=1, column=2, padx=2, pady=2)
-ttk.Button(btn_frame_merge, text="Ordem alfabética (Ctrl+S)", 
-          command=lambda: sort_az(merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var), width=24).grid(row=1, column=3, padx=2, pady=2)
-
-# DESTINO DO ARQUIVO - MAIS COMPACTO
-frame_output_merge = ttk.LabelFrame(merge_frame, text="Configurações de Saída")
-frame_output_merge.pack(fill="x", padx=10, pady=5)
-
-# Pasta de saída
-ttk.Label(frame_output_merge, text="Nome do arquivo final:").grid(row=0, column=0, padx=5, pady=3, sticky="w")
-merge_filename_entry = ttk.Entry(frame_output_merge, width=40)
-merge_filename_entry.insert(0, "Deixe vazio para nome automático")
-merge_filename_entry.config(foreground="gray")
-merge_filename_entry.grid(row=0, column=1, padx=5, pady=3, sticky="ew")
-
-# Pasta de saída (SEGUNDO)
-ttk.Label(frame_output_merge, text="Pasta de saída:").grid(row=1, column=0, padx=5, pady=3, sticky="w")
-merge_output_entry = ttk.Entry(frame_output_merge, width=40)
-merge_output_entry.grid(row=1, column=1, padx=5, pady=3, sticky="ew")
-ttk.Button(frame_output_merge, text="Selecionar Pasta", 
-          command=lambda: choose_output_folder(merge_output_entry)).grid(row=1, column=2, padx=5, pady=3)
-
-# Preview (TERCEIRO)
-filename_preview_var = tk.StringVar()
-filename_preview_label = ttk.Label(frame_output_merge, textvariable=filename_preview_var, 
-                                  foreground="blue", font=("Segoe UI", 8))
-filename_preview_label.grid(row=2, column=0, columnspan=3, padx=10, pady=2, sticky="w")
-
-frame_output_merge.columnconfigure(1, weight=1)
-
-# OPÇÕES DE PROCESSAMENTO - REORGANIZADAS
-frame_opts_merge = ttk.LabelFrame(merge_frame, text="Opções de Processamento")
-frame_opts_merge.pack(fill="x", padx=10, pady=5)
-
-# Linha 1: PDF/A com texto explicativo
-pdfa_var.set(PDFA_AVAILABLE)
-pdfa_check = ttk.Checkbutton(frame_opts_merge, text="Converter para PDF/A-2B", variable=pdfa_var)
-pdfa_check.grid(row=0, column=0, sticky="w", padx=10, pady=3)
-
-# TEXTO EXPLICATIVO DO PDF/A (como você gostava)
-pdfa_info_label = ttk.Label(
-    frame_opts_merge,
-    text="Formato PDF/A-2B recomendado para o Sistema Eletrônico de Informações (SEI) do Governo Federal",
-    foreground="darkgreen",
-    font=("Segoe UI", 8)
-)
-pdfa_info_label.grid(row=0, column=1, columnspan=2, padx=10, pady=3, sticky="w")
-
-# Linha 2: Senha
-protect_check = ttk.Checkbutton(frame_opts_merge, text="Proteger com senha", variable=protect_var)
-protect_check.grid(row=1, column=0, sticky="w", padx=10, pady=3)
-
-password_entry = ttk.Entry(frame_opts_merge, width=20, show="*")
-password_entry.grid(row=1, column=1, padx=5, pady=3, sticky="w")
-password_entry.config(state="disabled")
-
-# Linha 3: Compressão e Metadados
-compress_check = ttk.Checkbutton(frame_opts_merge, text="Comprimir PDF:", variable=compress_var)
-compress_check.grid(row=2, column=0, sticky="w", padx=10, pady=3)
-
-compress_combo = ttk.Combobox(
-    frame_opts_merge, 
-    textvariable=compress_level,
-    values=["Qualidade Máxima", "Qualidade Equilibrada", "Tamanho Mínimo"],
-    state="readonly",
-    width=25
-)
-compress_combo.grid(row=2, column=1, padx=5, pady=3, sticky="w")
-compress_combo.set("Qualidade Máxima")
-compress_combo.config(state="disabled")
-
-meta_check = ttk.Checkbutton(frame_opts_merge, text="Remover metadados", variable=meta_var)
-meta_check.grid(row=2, column=2, sticky="w", padx=20, pady=3)
-
-# Info PDF/A se não disponível
-if not PDFA_AVAILABLE:
-    pdfa_check.config(state="disabled")
-    pdfa_info_label.config(text="Instale Ghostscript para habilitar PDF/A", foreground="red")
-
-# BOTÃO PRINCIPAL - MAIOR DESTAQUE
-action_frame_merge = ttk.Frame(merge_frame)
-action_frame_merge.pack(fill="x", padx=10, pady=10)
-
-btn_merge = ttk.Button(
-    action_frame_merge, 
-    text="Juntar PDFs (Ctrl+R)", 
-    command=merge_pdfs
-)
-btn_merge.pack(pady=5)
-
-# Progresso
-progress_merge = ttk.Progressbar(merge_frame, orient="horizontal", length=520, mode="determinate")
-progress_merge.pack(pady=5)
-
-# Botão cancelar
-btn_cancel_merge = ttk.Button(merge_frame, text="Cancelar Operação", command=cancel_merge)
-
-# -----------------------
-# Aba Dividir/Extrair PDFs - REDESENHADA
-# -----------------------
-split_frame = ttk.Frame(notebook)
-notebook.add(split_frame, text="Dividir PDFs")
-
-# Frame de arquivos
-frame_files_split = ttk.LabelFrame(split_frame, text="Arquivos PDF (arraste para reordenar)")
-frame_files_split.pack(fill="both", expand=True, padx=10, pady=5)
-
-# Estatísticas
-stats_frame_split = ttk.Frame(frame_files_split)
-stats_frame_split.pack(fill="x", padx=5, pady=5)
-ttk.Label(stats_frame_split, textvariable=total_files_split_var, font=("Segoe UI", 9, "bold")).pack(side="left", padx=10)
-ttk.Label(stats_frame_split, textvariable=total_pages_split_var, font=("Segoe UI", 9, "bold")).pack(side="left", padx=10)
-ttk.Label(stats_frame_split, textvariable=total_size_split_var, font=("Segoe UI", 9, "bold")).pack(side="left", padx=10)
-
-# Listbox
-split_list_frame = ttk.Frame(frame_files_split)
-split_list_frame.pack(fill="both", expand=True, padx=5, pady=5)
-split_list = tk.Listbox(split_list_frame, selectmode=tk.EXTENDED, width=85, height=12, exportselection=False)
-split_list.pack(side=tk.LEFT, fill="both", expand=True)
-
-if DND_AVAILABLE:
-    split_list.drop_target_register(DND_FILES)
-    split_list.dnd_bind('<<Drop>>', lambda e: drop(e, split_list, total_files_split_var, total_pages_split_var, total_size_split_var))
-
-split_list.bind("<Double-1>", lambda e: open_pdf(split_list, e))
-attach_dynamic_tooltips(split_list)
-setup_drag_reorder(split_list)
-# 🚨 CORREÇÃO: Menu de contexto adicionado
-setup_context_menu(split_list, total_files_split_var, total_pages_split_var, total_size_split_var)
-
-split_list.bind("<Shift-Up>", lambda e: (move_up(split_list), "break")[1])
-split_list.bind("<Shift-Down>", lambda e: (move_down(split_list), "break")[1])
-
-scroll_split = ttk.Scrollbar(split_list_frame, orient="vertical", command=split_list.yview)
-scroll_split.pack(side=tk.RIGHT, fill="y")
-split_list.config(yscrollcommand=scroll_split.set)
-
-# BOTÕES DE CONTROLE
-btn_frame_split = ttk.Frame(split_frame)
-btn_frame_split.pack(fill="x", padx=10, pady=8)
-
-# Linha 1: Gerenciamento
-ttk.Label(btn_frame_split, text="Gerenciar Arquivos:", font=("Segoe UI", 9, "bold")).grid(row=0, column=0, padx=(0,5), pady=2, sticky="w")
-ttk.Button(btn_frame_split, text="Adicionar (Ctrl+O)", 
-          command=lambda: add_files(split_list, total_files_split_var, total_pages_split_var, total_size_split_var)).grid(row=0, column=1, padx=2, pady=2)
-ttk.Button(btn_frame_split, text="Remover (Del)", 
-          command=lambda: remove_selected(split_list, total_files_split_var, total_pages_split_var, total_size_split_var)).grid(row=0, column=2, padx=2, pady=2)
-ttk.Button(btn_frame_split, text="Limpar (Ctrl+L)", 
-          command=lambda: clear_list(split_list, total_files_split_var, total_pages_split_var, total_size_split_var)).grid(row=0, column=3, padx=2, pady=2)
-
-# =============================================================================
-# NOVA SEÇÃO: OPÇÕES DE DIVISÃO AVANÇADAS (COM ORDEM CORRIGIDA)
-# =============================================================================
-
-# Frame principal de opções
-frame_split_opts = ttk.LabelFrame(split_frame, text="Configurações de Divisão")
-frame_split_opts.pack(fill="x", padx=10, pady=5)
-
-# ----- MODO 1: EXTRAIR PÁGINAS ESPECÍFICAS -----
-extract_radio = ttk.Radiobutton(
-    frame_split_opts,
-    text="Extrair páginas específicas:",
-    variable=split_mode_var,
-    value="extract"
-)
-extract_radio.grid(row=0, column=0, padx=10, pady=5, sticky="w")
-
-split_pages_entry = ttk.Entry(frame_split_opts, width=40)
-split_pages_entry.grid(row=0, column=1, padx=5, pady=5, sticky="w")
-split_pages_entry.insert(0, "1-5, 10, 20-30")
-
-info_label = ttk.Label(
-    frame_split_opts,
-    text="Exemplos: 1-5 (páginas 1 a 5) • 1,3,5 (páginas 1, 3 e 5) • 1-3,7,10-15 (combina intervalos)",
-    foreground="gray",
-    font=("Segoe UI", 8)
-)
-info_label.grid(row=1, column=1, padx=10, pady=(0, 5), sticky="w")
-
-# ----- MODO 2: DIVIDIR POR INTERVALO -----
-interval_radio = ttk.Radiobutton(
-    frame_split_opts,
-    text="Dividir em intervalos de:",
-    variable=split_mode_var,
-    value="interval"
-)
-interval_radio.grid(row=2, column=0, padx=10, pady=5, sticky="w")
-
-interval_frame = ttk.Frame(frame_split_opts)
-interval_frame.grid(row=2, column=1, padx=5, pady=5, sticky="w")
-
-split_interval_entry = ttk.Entry(interval_frame, textvariable=split_interval_var, width=8)
-split_interval_entry.pack(side="left", padx=(0, 5))
-
-ttk.Label(interval_frame, text="páginas por arquivo (ex: 5 → 5+5+5+3 = 18 páginas)", 
-          foreground="gray", font=("Segoe UI", 8)).pack(side="left")
-
-# ----- MODO 3: DIVIDIR EM X PARTES -----
-parts_radio = ttk.Radiobutton(
-    frame_split_opts,
-    text="Dividir em:",
-    variable=split_mode_var,
-    value="parts"
-)
-parts_radio.grid(row=3, column=0, padx=10, pady=5, sticky="w")
-
-parts_frame = ttk.Frame(frame_split_opts)
-parts_frame.grid(row=3, column=1, padx=5, pady=5, sticky="w")
-
-split_parts_entry = ttk.Entry(parts_frame, textvariable=split_parts_var, width=8)
-split_parts_entry.pack(side="left", padx=(0, 5))
-
-ttk.Label(parts_frame, text="partes iguais (ex: 18 páginas ÷ 3 partes = 6 páginas/parte)", 
-          foreground="gray", font=("Segoe UI", 8)).pack(side="left")
-
-# ----- MODO 4: DIVIDIR TODAS AS PÁGINAS (AGORA EM ÚLTIMO LUGAR) -----
-all_radio = ttk.Radiobutton(
-    frame_split_opts,
-    text="Dividir TODAS as páginas em arquivos separados (1 página por arquivo)",
-    variable=split_mode_var,
-    value="all"
-)
-all_radio.grid(row=4, column=0, columnspan=2, padx=10, pady=5, sticky="w")
-
-# Configurar estados iniciais dos campos
-def update_split_fields_state(*args):
-    """Habilita/desabilita campos baseado no modo selecionado"""
-    mode = split_mode_var.get()
+def criar_interface():
+    global root, total_files_merge_var, total_pages_merge_var, total_size_merge_var
+    global total_files_split_var, total_pages_split_var, total_size_split_var
+    global merge_badge_var, split_badge_var, split_all_var, protect_var, pdfa_var
+    global pdfa_var_split, compress_var, meta_var, split_mode_var, split_interval_var
+    global split_parts_var, status_var, compress_level
+    global merge_list, split_list, btn_merge, btn_split, progress_merge, progress_split
+    global btn_cancel_merge, btn_cancel_split, password_entry, compress_combo
+    global merge_filename_entry, merge_output_entry, split_output_entry
+    global split_pages_entry, split_interval_entry, split_parts_entry
+    global status_label, notebook
+    global DND_AVAILABLE, PDF_LIBS_AVAILABLE, PDFA_AVAILABLE, GHOSTSCRIPT_PATH
     
-    # Todos começam desabilitados
-    split_pages_entry.config(state="disabled")
-    split_interval_entry.config(state="disabled")
-    split_parts_entry.config(state="disabled")
+    if DND_AVAILABLE:
+        try:
+            root = TkinterDnD.Tk()
+            logging.info("Janela com Drag & Drop")
+        except Exception as e:
+            logging.error(f"Erro ao criar janela DnD: {e}")
+            root = tk.Tk()
+            DND_AVAILABLE = False
+    else:
+        root = tk.Tk()
+        logging.info("Janela sem Drag & Drop")
     
-    # Habilita apenas o campo do modo selecionado
-    if mode == "extract":
-        split_pages_entry.config(state="normal")
-    elif mode == "interval":
-        split_interval_entry.config(state="normal")
-    elif mode == "parts":
-        split_parts_entry.config(state="normal")
+    if not PDF_LIBS_AVAILABLE:
+        messagebox.showerror("Erro Crítico", 
+                           "PyPDF2 não está disponível!\n\n"
+                           "Execute 'pip install PyPDF2' ou execute o 'install.bat' incluído.")
+        sys.exit(1)
+    
+    total_files_merge_var = tk.StringVar(value="0 arquivos")
+    total_pages_merge_var = tk.StringVar(value="0 páginas") 
+    total_size_merge_var = tk.StringVar(value="0 MB")
 
-# Conectar mudança de modo
-split_mode_var.trace_add("write", update_split_fields_state)
+    total_files_split_var = tk.StringVar(value="0 arquivos")
+    total_pages_split_var = tk.StringVar(value="0 páginas") 
+    total_size_split_var = tk.StringVar(value="0 MB")
 
-# Aplicar estado inicial
-update_split_fields_state()
+    merge_badge_var = tk.StringVar(value="")
+    split_badge_var = tk.StringVar(value="")
 
-# DESTINO E OPÇÕES
-frame_output_split = ttk.LabelFrame(split_frame, text="Configurações de Saída")
-frame_output_split.pack(fill="x", padx=10, pady=5)
+    split_all_var = tk.BooleanVar(value=False)
+    protect_var = tk.BooleanVar(value=False)
+    pdfa_var = tk.BooleanVar(value=PDFA_AVAILABLE)
+    pdfa_var_split = tk.BooleanVar(value=PDFA_AVAILABLE)
+    compress_var = tk.BooleanVar(value=False)
+    meta_var = tk.BooleanVar(value=False)
 
-# Pasta de saída
-ttk.Label(frame_output_split, text="Pasta de saída:").grid(row=0, column=0, padx=5, pady=3, sticky="w")
-split_output_entry = ttk.Entry(frame_output_split, width=40)
-split_output_entry.grid(row=0, column=1, padx=5, pady=3, sticky="ew")
-ttk.Button(frame_output_split, text="Selecionar Pasta", 
-          command=lambda: choose_output_folder(split_output_entry)).grid(row=0, column=2, padx=5, pady=3)
+    split_mode_var = tk.StringVar(value="extract")
+    split_interval_var = tk.StringVar(value="5")
+    split_parts_var = tk.StringVar(value="3")
 
-# PDF/A option
-pdfa_var_split.set(PDFA_AVAILABLE)
-pdfa_check_split = ttk.Checkbutton(frame_output_split, text="Converter para PDF/A-2B", variable=pdfa_var_split)
-pdfa_check_split.grid(row=1, column=0, columnspan=2, sticky="w", padx=10, pady=3)
-pdfa_info_split = ttk.Label(
-    frame_output_split,
-    text="Formato recomendado para documentos eletrônicos no SEI/Governo Federal",
-    foreground="darkgreen", 
-    font=("Segoe UI", 8)
-)
-pdfa_info_split.grid(row=1, column=2, padx=10, pady=3, sticky="w")
+    status_var = tk.StringVar()
 
-if not PDFA_AVAILABLE:
-    pdfa_check_split.config(state="disabled")
-    pdfa_info_split.config(text="Instale Ghostscript para habilitar", foreground="red")
+    compress_level = tk.StringVar(value="Qualidade Máxima")
+    
+    root.title("JuntaPDF")
+    root.geometry("900x750")
+    root.resizable(True, True)
 
-frame_output_split.columnconfigure(1, weight=1)
+    menubar = tk.Menu(root)
 
-# BOTÃO PRINCIPAL
-action_frame_split = ttk.Frame(split_frame)
-action_frame_split.pack(fill="x", padx=10, pady=10)
+    arquivo_menu = tk.Menu(menubar, tearoff=0)
 
-btn_split = ttk.Button(
-    action_frame_split, 
-    text="Dividir/Extrair PDFs", 
-    command=split_or_extract_pdfs
-)
-btn_split.pack(pady=5)
+    def get_current_tab_components():
+        current_tab = notebook.select()
+        tabs = notebook.tabs()
+        
+        if current_tab == tabs[0]:
+            return merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var
+        elif current_tab == tabs[1]:
+            return split_list, total_files_split_var, total_pages_split_var, total_size_split_var
+        return merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var
 
-# Progresso
-progress_split = ttk.Progressbar(split_frame, orient="horizontal", length=520, mode="determinate")
-progress_split.pack(pady=5)
+    def menu_adicionar_arquivos():
+        listbox, files_var, pages_var, size_var = get_current_tab_components()
+        add_files(listbox, files_var, pages_var, size_var)
 
-# Botão cancelar
-btn_cancel_split = ttk.Button(split_frame, text="Cancelar Operação", command=cancel_split)
+    def menu_remover_selecionados():
+        listbox, files_var, pages_var, size_var = get_current_tab_components()
+        remove_selected(listbox, files_var, pages_var, size_var)
 
-# -----------------------
-# Atalhos globais
-# -----------------------
-def get_active_listbox():
-    current_tab = notebook.select()
-    tabs = notebook.tabs()
-    if current_tab == tabs[0]:
-        return merge_list
-    elif current_tab == tabs[1]:
+    def menu_limpar_lista():
+        listbox, files_var, pages_var, size_var = get_current_tab_components()
+        clear_list(listbox, files_var, pages_var, size_var)
+
+    
+    arquivo_menu.add_command(
+        label="Executar Operação (Ctrl+R)", 
+        command=executar_operacao_aba_ativa,
+        accelerator="Ctrl+R"
+    )
+    arquivo_menu.add_separator()
+    arquivo_menu.add_command(
+        label="Adicionar Arquivos (Ctrl+O)", 
+        command=menu_adicionar_arquivos,
+        accelerator="Ctrl+O"
+    )
+   
+    arquivo_menu.add_command(
+        label="Limpar Lista (Ctrl+L)", 
+        command=menu_limpar_lista,
+        accelerator="Ctrl+L"
+    )
+
+    arquivo_menu.add_separator()
+
+    arquivo_menu.add_command(
+        label="Sair", 
+        command=on_closing,
+        accelerator="Esc"
+    )
+
+    menubar.add_cascade(label="Arquivo", menu=arquivo_menu)
+
+    sobre_menu = tk.Menu(menubar, tearoff=0)
+    sobre_menu.add_command(label="Licenças & Créditos", command=mostrar_licencas)
+    sobre_menu.add_command(label="Verificar Ambiente", command=show_environment_check)
+    sobre_menu.add_command(label="Dashboard de Performance", command=show_performance_dashboard)
+    menubar.add_cascade(label="Sobre o JuntaPDF", menu=sobre_menu)
+
+    root.config(menu=menubar)
+
+    status_label = ttk.Label(root, textvariable=status_var, foreground="blue")
+    status_label.pack(side="bottom", pady=5)
+
+    status_parts = ["Pronto"]
+    if DND_AVAILABLE:
+        status_parts.append("Drag & Drop ✓")
+    if PDFA_AVAILABLE:
+        status_parts.append("PDF/A ✓")
+    else:
+        status_parts.append("PDF/A ✗")
+
+    status_var.set(" | ".join(status_parts))
+
+    notebook = ttk.Notebook(root)
+    notebook.pack(fill="both", expand=True, padx=10, pady=5)
+
+    merge_frame = ttk.Frame(notebook)
+    notebook.add(merge_frame, text="Juntar PDFs")
+
+    stats_header = ttk.Frame(merge_frame, relief="solid", borderwidth=1, padding=10)
+    stats_header.pack(fill="x", padx=10, pady=5)
+
+    ttk.Label(stats_header, text="📊", font=("Segoe UI", 14)).pack(side="left", padx=5)
+    ttk.Label(stats_header, textvariable=total_files_merge_var, font=("Segoe UI", 10, "bold")).pack(side="left", padx=10)
+    ttk.Label(stats_header, text="•", foreground="gray").pack(side="left")
+    ttk.Label(stats_header, textvariable=total_pages_merge_var, font=("Segoe UI", 10)).pack(side="left", padx=10)
+    ttk.Label(stats_header, text="•", foreground="gray").pack(side="left")
+    ttk.Label(stats_header, textvariable=total_size_merge_var, font=("Segoe UI", 10)).pack(side="left", padx=10)
+
+    files_section = ttk.LabelFrame(merge_frame, text="Arquivos PDF (arraste para reordenar)")
+    files_section.pack(fill="both", expand=True, padx=10, pady=5)
+
+    toolbar = ttk.Frame(files_section)
+    toolbar.pack(fill="x", padx=5, pady=5)
+
+    ttk.Button(toolbar, text="Adicionar (Ctrl+O)", 
+              command=lambda: add_files(merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var)).pack(side="left", padx=2)
+    ttk.Button(toolbar, text="Remover (Del)", 
+              command=lambda: remove_selected(merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var)).pack(side="left", padx=2)
+    ttk.Button(toolbar, text="Limpar (Ctrl+L)", 
+              command=lambda: clear_list(merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var)).pack(side="left", padx=2)
+
+    ttk.Separator(toolbar, orient="vertical").pack(side="left", fill="y", padx=5)
+
+    ttk.Button(toolbar, text="Mover ↑ (Shift+↑)", command=lambda: move_up(merge_list)).pack(side="left", padx=2)
+    ttk.Button(toolbar, text="Mover ↓ (Shift+↓)", command=lambda: move_down(merge_list)).pack(side="left", padx=2)
+    ttk.Button(toolbar, text="Ordem A→Z (Ctrl+S)", 
+              command=lambda: sort_az(merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var)).pack(side="left", padx=2)
+
+    list_frame = ttk.Frame(files_section)
+    list_frame.pack(fill="both", expand=True, padx=5, pady=5)
+
+    merge_list = tk.Listbox(list_frame, selectmode=tk.EXTENDED, height=10)
+    merge_list.pack(side=tk.LEFT, fill="both", expand=True)
+
+    scroll_merge = ttk.Scrollbar(list_frame, orient="vertical", command=merge_list.yview)
+    scroll_merge.pack(side=tk.RIGHT, fill="y")
+    merge_list.config(yscrollcommand=scroll_merge.set)
+
+    merge_list.bind("<Double-1>", lambda e: open_pdf(merge_list, e))
+    attach_dynamic_tooltips(merge_list)
+    setup_drag_reorder(merge_list)
+    setup_context_menu(merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var)
+
+    if DND_AVAILABLE:
+        merge_list.drop_target_register(DND_FILES)
+        merge_list.dnd_bind('<<Drop>>', lambda e: drop(e, merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var))
+
+    config_section = ttk.LabelFrame(merge_frame, text="Configurações de Saída")
+    config_section.pack(fill="x", padx=10, pady=5)
+
+    config_section.columnconfigure(1, weight=1)
+
+    chk_pdfa = ttk.Checkbutton(
+    config_section, 
+    text="Converter para PDF/A-2B", 
+    variable=pdfa_var,
+    command=toggle_password_entry
+    )
+    chk_pdfa.grid(row=0, column=0, sticky="w", padx=10, pady=5)
+
+    pdfa_info_label = ttk.Label(
+        config_section,
+        text="Formato PDF/A-2B recomendado para o Sistema Eletrônico de Informações (SEI) do Governo Federal" if PDFA_AVAILABLE else "Instale Ghostscript para habilitar PDF/A",
+        foreground="darkgreen" if PDFA_AVAILABLE else "red",
+        font=("Segoe UI", 8)
+    )
+    pdfa_info_label.grid(row=0, column=1, padx=10, pady=5, sticky="w")
+
+    compress_frame = ttk.Frame(config_section)
+    compress_frame.grid(row=1, column=0, columnspan=2, sticky="w", padx=10, pady=5)
+    ttk.Checkbutton(compress_frame, text="Comprimir PDF:", variable=compress_var).pack(side="left")
+    compress_combo = ttk.Combobox(compress_frame, textvariable=compress_level, 
+                                  values=["Qualidade Máxima", "Qualidade Equilibrada", "Tamanho Mínimo"],
+                                  state="readonly", width=20)
+    compress_combo.pack(side="left", padx=5)
+    compress_combo.set("Qualidade Máxima")
+    compress_combo.config(state="disabled")
+
+    protect_frame = ttk.Frame(config_section)
+    protect_frame.grid(row=2, column=0, columnspan=2, sticky="w", padx=10, pady=5)
+    ttk.Checkbutton(protect_frame, text="Proteger com senha:", variable=protect_var,
+                   command=lambda: toggle_password_entry()).pack(side="left")
+    password_entry = ttk.Entry(protect_frame, width=20, show="*", state="disabled")
+    password_entry.pack(side="left", padx=5)
+
+    ttk.Checkbutton(config_section, text="Remover metadados", variable=meta_var).grid(row=3, column=0, sticky="w", padx=10, pady=5)
+
+    name_frame = ttk.Frame(config_section)
+    name_frame.grid(row=4, column=0, columnspan=2, sticky="ew", padx=10, pady=5)
+    ttk.Label(name_frame, text="Nome do arquivo final:").pack(side="left")
+    merge_filename_entry = ttk.Entry(name_frame)
+    merge_filename_entry.pack(side="left", fill="x", expand=True, padx=5)
+    merge_filename_entry.insert(0, "Deixe vazio para nome automático")
+    merge_filename_entry.config(foreground="gray")
+
+    def on_merge_filename_focusin(event):
+        if merge_filename_entry.get() == "Deixe vazio para nome automático":
+            merge_filename_entry.delete(0, tk.END)
+            safe_widget_config(merge_filename_entry, foreground="black")
+
+    def on_merge_filename_focusout(event):
+        if not merge_filename_entry.get().strip():
+            safe_widget_config(merge_filename_entry, foreground="gray")
+            merge_filename_entry.insert(0, "Deixe vazio para nome automático")
+
+    merge_filename_entry.bind("<FocusIn>", on_merge_filename_focusin)
+    merge_filename_entry.bind("<FocusOut>", on_merge_filename_focusout)
+
+    output_frame = ttk.Frame(config_section)
+    output_frame.grid(row=5, column=0, columnspan=2, sticky="ew", padx=10, pady=5)
+    ttk.Label(output_frame, text="Pasta de saída:").pack(side="left")
+    merge_output_entry = ttk.Entry(output_frame)
+    merge_output_entry.pack(side="left", fill="x", expand=True, padx=5)
+    ttk.Button(output_frame, text="Selecionar Pasta", command=lambda: choose_output_folder(merge_output_entry)).pack(side="left")
+
+    if not PDFA_AVAILABLE:
+        chk_pdfa.config(state="disabled")
+        pdfa_info_label.config(text="Instale Ghostscript para habilitar PDF/A", foreground="red")
+
+    action_section = ttk.Frame(merge_frame)
+    action_section.pack(fill="x", padx=10, pady=10)
+
+    btn_merge = ttk.Button(action_section, text="Juntar PDFs (Ctrl+R)", command=merge_pdfs)
+    btn_merge.pack(pady=10)
+
+    progress_merge = ttk.Progressbar(action_section, mode="determinate", length=400)
+    progress_merge.pack(pady=5)
+
+    btn_cancel_merge = ttk.Button(merge_frame, text="Cancelar Operação", command=cancel_merge)
+
+    split_frame = ttk.Frame(notebook)
+    notebook.add(split_frame, text="Dividir PDFs")
+
+    stats_header_split = ttk.Frame(split_frame, relief="solid", borderwidth=1, padding=10)
+    stats_header_split.pack(fill="x", padx=10, pady=5)
+
+    ttk.Label(stats_header_split, text="📊", font=("Segoe UI", 14)).pack(side="left", padx=5)
+    ttk.Label(stats_header_split, textvariable=total_files_split_var, font=("Segoe UI", 10, "bold")).pack(side="left", padx=10)
+    ttk.Label(stats_header_split, text="•", foreground="gray").pack(side="left")
+    ttk.Label(stats_header_split, textvariable=total_pages_split_var, font=("Segoe UI", 10)).pack(side="left", padx=10)
+    ttk.Label(stats_header_split, text="•", foreground="gray").pack(side="left")
+    ttk.Label(stats_header_split, textvariable=total_size_split_var, font=("Segoe UI", 10)).pack(side="left", padx=10)
+
+    files_section_split = ttk.LabelFrame(split_frame, text="Arquivos PDF")
+    files_section_split.pack(fill="both", expand=True, padx=10, pady=5)
+
+    toolbar_split = ttk.Frame(files_section_split)
+    toolbar_split.pack(fill="x", padx=5, pady=5)
+
+    ttk.Button(toolbar_split, text="Adicionar (Ctrl+O)", 
+              command=lambda: add_files(split_list, total_files_split_var, total_pages_split_var, total_size_split_var)).pack(side="left", padx=2)
+    ttk.Button(toolbar_split, text="Remover (Del)", 
+              command=lambda: remove_selected(split_list, total_files_split_var, total_pages_split_var, total_size_split_var)).pack(side="left", padx=2)
+    ttk.Button(toolbar_split, text="Limpar (Ctrl+L)", 
+              command=lambda: clear_list(split_list, total_files_split_var, total_pages_split_var, total_size_split_var)).pack(side="left", padx=2)
+
+    list_frame_split = ttk.Frame(files_section_split)
+    list_frame_split.pack(fill="both", expand=True, padx=5, pady=5)
+
+    split_list = tk.Listbox(list_frame_split, selectmode=tk.EXTENDED, height=10)
+    split_list.pack(side=tk.LEFT, fill="both", expand=True)
+
+    scroll_split = ttk.Scrollbar(list_frame_split, orient="vertical", command=split_list.yview)
+    scroll_split.pack(side=tk.RIGHT, fill="y")
+    split_list.config(yscrollcommand=scroll_split.set)
+
+    split_list.bind("<Double-1>", lambda e: open_pdf(split_list, e))
+    attach_dynamic_tooltips(split_list)
+    setup_drag_reorder(split_list)
+    setup_context_menu(split_list, total_files_split_var, total_pages_split_var, total_size_split_var)
+
+    if DND_AVAILABLE:
+        split_list.drop_target_register(DND_FILES)
+        split_list.dnd_bind('<<Drop>>', lambda e: drop(e, split_list, total_files_split_var, total_pages_split_var, total_size_split_var))
+
+    split_config = ttk.LabelFrame(split_frame, text="Configurações de Divisão")
+    split_config.pack(fill="x", padx=10, pady=5)
+
+    mode_frame = ttk.Frame(split_config)
+    mode_frame.pack(fill="x", padx=10, pady=10)
+
+    ttk.Label(mode_frame, text="Modo:", font=("Segoe UI", 9, "bold")).pack(side="left", padx=(0,10))
+
+    split_mode_combo = ttk.Combobox(mode_frame, width=35, state="readonly")
+    split_mode_combo['values'] = (
+        "Extrair páginas específicas",
+        "Dividir por intervalo de páginas", 
+        "Dividir em partes iguais",
+        "Dividir todas (1 arquivo por página)"
+    )
+    split_mode_combo.current(0)
+    split_mode_combo.pack(side="left", padx=5)
+
+    options_frame = ttk.Frame(split_config)
+    options_frame.pack(fill="x", padx=10, pady=5)
+
+    split_pages_entry = ttk.Entry(options_frame, width=40)
+    split_interval_entry = ttk.Entry(options_frame, width=10)
+    split_parts_entry = ttk.Entry(options_frame, width=10)
+
+    def update_split_mode(*args):
+        for widget in options_frame.winfo_children():
+            widget.pack_forget()
+        
+        mode_idx = split_mode_combo.current()
+        
+        if mode_idx == 0:
+            ttk.Label(options_frame, text="Páginas:").pack(side="left", padx=5)
+            split_pages_entry.pack(side="left", padx=5, fill="x", expand=True)
+            split_pages_entry.delete(0, tk.END)
+            split_pages_entry.insert(0, "1-5, 10, 20-30")
+            ttk.Label(options_frame, text="Ex: 1-5, 10, 20-30", foreground="gray", font=("Segoe UI", 8)).pack(side="left", padx=5)
+            split_mode_var.set("extract")
+            
+        elif mode_idx == 1:
+            ttk.Label(options_frame, text="Páginas por arquivo:").pack(side="left", padx=5)
+            split_interval_entry.pack(side="left", padx=5)
+            split_interval_entry.delete(0, tk.END)
+            split_interval_entry.insert(0, "5")
+            ttk.Label(options_frame, text="Ex: 5 → divide em grupos de 5 páginas", foreground="gray", font=("Segoe UI", 8)).pack(side="left", padx=5)
+            split_mode_var.set("interval")
+            split_interval_var.set("5")
+            
+        elif mode_idx == 2:
+            ttk.Label(options_frame, text="Número de partes:").pack(side="left", padx=5)
+            split_parts_entry.pack(side="left", padx=5)
+            split_parts_entry.delete(0, tk.END)
+            split_parts_entry.insert(0, "3")
+            ttk.Label(options_frame, text="Ex: 3 → divide em 3 arquivos iguais", foreground="gray", font=("Segoe UI", 8)).pack(side="left", padx=5)
+            split_mode_var.set("parts")
+            split_parts_var.set("3")
+            
+        elif mode_idx == 3:
+            ttk.Label(options_frame, text="Cada página será salva como arquivo individual", 
+                     foreground="blue", font=("Segoe UI", 9)).pack(side="left", padx=10)
+            split_mode_var.set("all")
+
+    split_mode_combo.bind("<<ComboboxSelected>>", update_split_mode)
+    update_split_mode()
+
+    pdfa_frame = ttk.Frame(split_config)
+    pdfa_frame.pack(fill="x", padx=10, pady=5)
+    pdfa_check_split = ttk.Checkbutton(pdfa_frame, text="Converter para PDF/A-2B", variable=pdfa_var_split)
+    pdfa_check_split.pack(side="left")
+    pdfa_info_split = ttk.Label(
+        pdfa_frame,
+        text="Formato recomendado para documentos eletrônicos no SEI/Governo Federal",
+        foreground="darkgreen", 
+        font=("Segoe UI", 8)
+    )
+    pdfa_info_split.pack(side="left", padx=10)
+
+    if not PDFA_AVAILABLE:
+        pdfa_check_split.config(state="disabled")
+        pdfa_info_split.config(text="Instale Ghostscript para habilitar", foreground="red")
+
+    output_split_frame = ttk.Frame(split_config)
+    output_split_frame.pack(fill="x", padx=10, pady=5)
+    ttk.Label(output_split_frame, text="Pasta de saída:").pack(side="left")
+    split_output_entry = ttk.Entry(output_split_frame)
+    split_output_entry.pack(side="left", fill="x", expand=True, padx=5)
+    ttk.Button(output_split_frame, text="Selecionar Pasta", command=lambda: choose_output_folder(split_output_entry)).pack(side="left")
+
+    action_section_split = ttk.Frame(split_frame)
+    action_section_split.pack(fill="x", padx=10, pady=10)
+
+    btn_split = ttk.Button(action_section_split, text="Dividir/Extrair PDFs (Ctrl+R)", command=split_or_extract_pdfs)
+    btn_split.pack(pady=10)
+
+    progress_split = ttk.Progressbar(action_section_split, mode="determinate", length=400)
+    progress_split.pack(pady=5)
+
+    btn_cancel_split = ttk.Button(split_frame, text="Cancelar Operação", command=cancel_split)
+
+    def get_active_listbox():
+        current_tab = notebook.select()
+        tabs = notebook.tabs()
+        if current_tab == tabs[0]:
+            return merge_list
         return split_list
-    return merge_list
 
-root.bind_all("<Control-o>", lambda e: add_files(get_active_listbox(), total_files_merge_var, total_pages_merge_var, total_size_merge_var))
-root.bind_all("<Control-O>", lambda e: add_files(get_active_listbox(), total_files_merge_var, total_pages_merge_var, total_size_merge_var))
-root.bind_all("<Delete>", lambda e: remove_selected(get_active_listbox(), total_files_merge_var, total_pages_merge_var, total_size_merge_var))
-root.bind_all("<Control-l>", lambda e: clear_list(get_active_listbox(), total_files_merge_var, total_pages_merge_var, total_size_merge_var))
-root.bind_all("<Control-L>", lambda e: clear_list(get_active_listbox(), total_files_merge_var, total_pages_merge_var, total_size_merge_var))
-root.bind_all("<Control-s>", lambda e: sort_az(get_active_listbox(), total_files_merge_var, total_pages_merge_var, total_size_merge_var))
-root.bind_all("<Control-S>", lambda e: sort_az(get_active_listbox(), total_files_merge_var, total_pages_merge_var, total_size_merge_var))
-root.bind_all("<Control-r>", lambda e: merge_pdfs())
-root.bind_all("<Control-R>", lambda e: merge_pdfs())
-root.bind_all("<Escape>", lambda e: root.quit())
+    def get_active_vars():
+        current_tab = notebook.select()
+        tabs = notebook.tabs()
+        if current_tab == tabs[0]:
+            return merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var
+        return split_list, total_files_split_var, total_pages_split_var, total_size_split_var
 
-# -----------------------
-# Inicialização final
-# -----------------------
-root.protocol("WM_DELETE_WINDOW", on_closing)
+    root.bind_all("<Control-o>", lambda e: add_files(*get_active_vars()))
+    root.bind_all("<Control-O>", lambda e: add_files(*get_active_vars()))
+    root.bind_all("<Delete>", lambda e: remove_selected(*get_active_vars()))
+    root.bind_all("<Control-l>", lambda e: clear_list(*get_active_vars()))
+    root.bind_all("<Control-L>", lambda e: clear_list(*get_active_vars()))
+    root.bind_all("<Control-s>", lambda e: sort_az(merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var))
+    root.bind_all("<Control-S>", lambda e: sort_az(merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var))
+    root.bind_all("<Control-r>", executar_operacao_aba_ativa)
+    root.bind_all("<Control-R>", executar_operacao_aba_ativa)
+    root.bind_all("<Escape>", lambda e: on_closing())
 
-# Configurar estados iniciais
-def on_protect_toggle(*_):
-    """Chamado quando proteção é alternada"""
-    validate_pdfa_protection_compatibility()
-    focus_password_entry()
+    merge_list.bind("<Shift-Up>", lambda e: (move_up(merge_list), "break")[1])
+    merge_list.bind("<Shift-Down>", lambda e: (move_down(merge_list), "break")[1])
 
-def on_pdfa_toggle(*_):
-    """Chamado quando PDF/A é alternado"""
-    validate_pdfa_protection_compatibility()
+    root.protocol("WM_DELETE_WINDOW", on_closing)
 
-# Conectar eventos
-protect_var.trace_add("write", lambda *_: on_protect_toggle())
-pdfa_var.trace_add("write", lambda *_: on_pdfa_toggle())
+    protect_var.trace_add("write", lambda *_: toggle_password_entry())
+    pdfa_var.trace_add("write", lambda *_: toggle_password_entry())
+    compress_var.trace_add("write", lambda *_: toggle_compress_combo())
 
-def on_compress_toggle(*_):
-    safe_widget_config(compress_combo, state="normal" if compress_var.get() else "disabled")
-compress_var.trace_add("write", lambda *_: (on_compress_toggle(), focus_compress_combo()))
+    update_stats(merge_list, total_files_merge_var, total_pages_merge_var, total_size_merge_var)
+    update_stats(split_list, total_files_split_var, total_pages_split_var, total_size_split_var)
 
-# Funções para placeholder do nome
-def on_merge_filename_focusin(event):
-    if merge_filename_entry.get() == "Deixe vazio para nome automático":
-        merge_filename_entry.delete(0, tk.END)
-        safe_widget_config(merge_filename_entry, foreground="black")
-
-def on_merge_filename_focusout(event):
-    if not merge_filename_entry.get().strip():
-        safe_widget_config(merge_filename_entry, foreground="gray")
-        merge_filename_entry.insert(0, "Deixe vazio para nome automático")
-
-merge_filename_entry.bind("<FocusIn>", on_merge_filename_focusin)
-merge_filename_entry.bind("<FocusOut>", on_merge_filename_focusout)
-
-# Função para atualizar preview do nome
-def update_filename_preview():
-    files = merge_list.get(0, tk.END)
-    if not files:
-        filename_preview_var.set("Nenhum arquivo selecionado")
-        return
-    
-    # 🔥 ADICIONAR ESTIMAÇÃO DE TAMANHO
-    estimated_size = estimate_final_size(files, {
-        'compress': compress_var.get(),
-        'compress_level': compress_level.get()
-    })
-    
-    preview_name = get_default_output_name("merge", files, {...})
-    preview_text = f"Nome: {preview_name} | Tamanho estimado: {estimated_size/1024/1024:.1f}MB"
-    filename_preview_var.set(preview_text)
-
-# Conectar eventos para atualizar preview
-merge_list.bind("<<ListboxSelect>>", lambda e: update_filename_preview())
-compress_var.trace_add("write", lambda *_: update_filename_preview())
-pdfa_var.trace_add("write", lambda *_: update_filename_preview())
-protect_var.trace_add("write", lambda *_: update_filename_preview())
-
-# Atualizar preview inicial
-root.after(500, update_filename_preview)
-
-# =============================================================================
-# CONFIGURAÇÃO DAS MELHORIAS DE UX
-# =============================================================================
-
-setup_ux_enhancements()
-
-# Configurar badges nas abas
-update_merge_badge = add_file_count_badge(merge_list, merge_badge_var)
-update_split_badge = add_file_count_badge(split_list, split_badge_var)
-
-# Atualizar badges inicialmente
-update_merge_badge()
-update_split_badge()
-
-# Atualizar textos das abas com badges
-def update_tab_titles():
-    notebook.tab(0, text=f"Juntar PDFs{merge_badge_var.get()}")
-    notebook.tab(1, text=f"Dividir PDFs{split_badge_var.get()}")
-
-merge_badge_var.trace_add("write", lambda *_: update_tab_titles())
-split_badge_var.trace_add("write", lambda *_: update_tab_titles())
-
-# Atualizar estado inicial dos botões
-root.after(500, enable_submit_on_conditions)
-
-# Aplicar validação inicial de compatibilidade
-root.after(600, lambda: update_protection_pdfa_states())
-
-# Foco inicial
-root.after(100, lambda: merge_list.focus_set())
-
-# Agora sim pode verificar dependências
-check_dependencies()
-show_first_run_disclaimer()
-
-# 🔥 NOVO: Verificação final de sanidade
-def verificar_sanidade_inicial():
-    """Verifica se todas as variáveis críticas foram inicializadas corretamente"""
-    variaveis_criticas = [
-        ('PDF_LIBS_AVAILABLE', PDF_LIBS_AVAILABLE),
-        ('GHOSTSCRIPT_PATH', GHOSTSCRIPT_PATH), 
-        ('PIKEPDF_AVAILABLE', PIKEPDF_AVAILABLE),
-        ('DND_AVAILABLE', DND_AVAILABLE),
-        ('PDFA_AVAILABLE', PDFA_AVAILABLE)
-    ]
-    
-    for nome, valor in variaveis_criticas:
-        logging.info(f"Status {nome}: {valor}")
-    
-    # Verifica se não há variáveis "fantasma" concatenadas
-    variaveis_globais = list(globals().keys())
-    variaveis_suspeitas = [v for v in variaveis_globais if 'AVAILABLE' in v and 'GHOSTSCRIPT' in v]
-    
-    if variaveis_suspeitas:
-        logging.warning(f"Variáveis suspeitas detectadas: {variaveis_suspeitas}")
-        # Remove variáveis concatenadas acidentais
-        for var_suspeita in variaveis_suspeitas:
-            if var_suspeita in globals():
-                del globals()[var_suspeita]
-                logging.info(f"Variável suspeita removida: {var_suspeita}")
-
-# Chamar verificação de sanidade
-verificar_sanidade_inicial()
-
-# Inicia a aplicação
 if __name__ == "__main__":
     try:
-        # Verificação final antes de iniciar
-        if not PDF_LIBS_AVAILABLE:
-            messagebox.showerror("Erro Crítico", "PyPDF2 não está disponível. O programa não pode funcionar.")
-            sys.exit(1)
-            
-        logging.info("✅ JuntaPDF inicializado com sucesso!")
-        logging.info("🚀 Iniciando interface gráfica...")
+        criar_interface()
         
-        # Opcional: oferta de recuperação (pode comentar se não quiser)
-        root.after(1000, offer_recovery_on_startup)
+        logging.info("JuntaPDF inicializado com sucesso!")
+        logging.info("Iniciando interface gráfica...")
         
         root.mainloop()
         
     except Exception as e:
-        logging.critical(f"❌ Erro fatal: {e}")
+        logging.critical(f"Erro fatal: {e}")
         messagebox.showerror("Erro Fatal", f"Ocorreu um erro inesperado:\n{e}")
     finally:
-        # Limpeza final garantida
-        logging.info("🧹 Finalizando JuntaPDF...")
+        logging.info("Finalizando JuntaPDF...")
         cleanup_temp_files()
